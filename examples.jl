@@ -45,8 +45,8 @@ Ns = 8;
 
 # data generation
 N1 = 6;
-N2 = 8;
-N3 = 10;
+N2 = 6;
+N3 = 6;
 idx1 = collect(0:(N1-1));
 idx2 = collect(0:(N2-1));
 idx3 = collect(0:(N3-1));
@@ -54,15 +54,15 @@ x = [(cos(2*pi*1/N1*i)+ 2*sin(2*pi*1/N1*i))*(cos(2*pi*2/N2*j) + 2*sin(2*pi*2/N2*
 Random.seed!(1)
 y = x + rand(N1, N2, N3); # noisy signal
 
-w = round.(fft(x)./sqrt(Nt), digits = 4);#true DFT
+w = round.(fft(x)./sqrt(N1*N2*N3), digits = 4);#true DFT
 DFTsize = size(x); # problem dim
 DFTdim = length(DFTsize); # problem size
 
 # randomly generate missing indices
 missprob = 0.05; # missing proportion
 m = Int(floor(Nt*(missprob))); # number of missing values
-index_nonmissing_Linear = sort(sample(1:Nt*Ns, Int(Nt*Ns - m), replace = false));
-index_missing_Linear = collect(setdiff(collect(1:Nt*Ns), index_nonmissing_Linear));
+index_nonmissing_Linear = sort(sample(1:N1*N2*N3, Int(N1*N2*N3 - m), replace = false));
+index_missing_Linear = collect(setdiff(collect(1:N1*N2*N3), index_nonmissing_Linear));
 index_nonmissing_Cartesian = map(i->CartesianIndices(y)[i], index_nonmissing_Linear);
 index_missing_Cartesian = map(i->CartesianIndices(y)[i], index_missing_Linear);
 # note it has to be Cartesian index in 2d and 3d
@@ -82,7 +82,7 @@ t_init = 1;
 
 # barrier method
 beta, c, timeave3d = barrier_mtd(beta_init, c_init, t_init, paramB);
-println("3d, N1 = 6, N2 = 8, N3 = 10, ave time = ", timeave3d);
+println("3d, N1 = 6, N2 = 6, N3 = 6, ave time = ", timeave3d);
 DFTest = beta_to_DFT(DFTdim, DFTsize, beta);
 
 #CG-ADMM
