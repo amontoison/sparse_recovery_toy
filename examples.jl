@@ -4,6 +4,7 @@ using SparseArrays;
 using Random, Distributions;
 using Ipopt, JuMP;
 using Plots;
+using NPZ;
 include("mapping.jl")
 include("Mtgeneration.jl")
 include("Mperptz.jl")
@@ -32,99 +33,12 @@ end
 
 # 1 dim Interior point and ADMM
 
-# data generation
-Nt = 50;
-t = collect(0:(Nt-1));
-x1 = 2*cos.(2*pi*t*6/Nt).+ 3*sin.(2*pi*t*6/Nt);
-x2 = 4*cos.(2*pi*t*10/Nt).+ 5*sin.(2*pi*t*10/Nt);
-x3 = 6*cos.(2*pi*t*40/Nt).+ 7*sin.(2*pi*t*40/Nt);
-x = x1.+x2.+x3; #signal
-Random.seed!(1)
-y = x + randn(Nt); #noisy signal
-
-w = round.(fft(x)./sqrt(Nt), digits = 4);#true DFT
-DFTsize = size(x); # problem dim
-DFTdim = length(DFTsize); # problem size
-
-# randomly generate missing indices
-missprob = 0.05; # missing proportion
-m = Int(floor(Nt*(missprob))); # number of missing values
-index_nonmissing = sort(sample(1:Nt, Nt - m, replace = false));
-index_missing = setdiff(collect(1:Nt), index_nonmissing);
-z_zero = y;
-z_zero[index_missing].= 0; # zero-imputed signal
-
-# unify parameter for barrier method
-M_perptz = M_perp_tz(z_zero, DFTdim, DFTsize); # M_perptz
-Mt = generate_Mt(DFTdim, DFTsize, index_missing); # Mt
-d = 100;
-paramB = param_unified(Mt, M_perptz, d, eps_barrier, mu_barrier, eps_NT, alpha_LS, gamma_LS);
-
-# initial values for barrier method
-beta_init = zeros(Nt);
-c_init = (d/(2*Nt)).*ones(Nt);
-t_init = 1;
-
-# barrier method
-beta, c, timeave1d = barrier_mtd(beta_init, c_init, t_init, paramB);
-# this is the average time of computing Newton's direction
-println("1d, N = 50, ave time = ", timeave1d);
-DFTest = beta_to_DFT(DFTdim, DFTsize, beta);
-
-println("1dADMM")
-#CG-ADMM
-lambda = 1;
-rho = 1;
-#beta_ADMM = cgADMM(Mt, M_perptz, lambda, rho)
-
 
 # 2 dim Interior point and ADMM
 
 # data generation
 Nt = 6;
 Ns = 8;
-t = collect(0:(Nt-1));
-s = collect(0:(Ns-1));
-x = (cos.(2*pi*2/Nt*t)+ 2*sin.(2*pi*2/Nt*t))*(cos.(2*pi*3/Ns*s) + 2*sin.(2*pi*3/Ns*s))';
-Random.seed!(1)
-y = x + randn(Nt,Ns)#noisy signal
-
-w = round.(fft(x)./sqrt(Nt), digits = 4);#true DFT
-DFTsize = size(x); # problem dim
-DFTdim = length(DFTsize); # problem size
-
-# randomly generate missing indices
-missprob = 0.05; # missing proportion
-m = Int(floor(Nt*(missprob))); # number of missing values
-index_nonmissing_Linear = sort(sample(1:Nt*Ns, Int(Nt*Ns - m), replace = false));
-index_missing_Linear = collect(setdiff(collect(1:Nt*Ns), index_nonmissing_Linear));
-index_nonmissing_Cartesian = map(i->CartesianIndices(y)[i], index_nonmissing_Linear);
-index_missing_Cartesian = map(i->CartesianIndices(y)[i], index_missing_Linear);
-# note it has to be Cartesian index in 2d and 3d
-z_zero = y;
-z_zero[index_missing_Cartesian].= 0; # zero-imputed signal
-
-# unify parameters for barrier method
-M_perptz = M_perp_tz(z_zero, DFTdim, DFTsize);
-Mt = generate_Mt(DFTdim, DFTsize, index_missing_Cartesian);
-d = 30;
-paramB = param_unified(Mt, M_perptz, d, eps_barrier, mu_barrier, eps_NT, alpha_LS, gamma_LS);
-
-# initial values for barrier method
-beta_init = zeros(Nt*Ns);
-c_init = (d/(2*Nt*Ns)).*ones(Nt*Ns);
-t_init = 1;
-
-println("start 2d barrier")
-# barrier method
-beta, c, timeave2d = barrier_mtd(beta_init, c_init, t_init, paramB);
-println("2d, Nt = 6, Ns = 8, ave time = ", timeave2d);
-DFTest = beta_to_DFT(DFTdim, DFTsize, beta);
-
-#CG-ADMM
-lambda = 1;
-rho = 1;
-#beta_ADMM = cgADMM(Mt, M_perptz, lambda, rho)
 
 
 # 3 dim Interior point and ADMM
