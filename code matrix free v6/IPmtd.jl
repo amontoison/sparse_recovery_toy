@@ -33,7 +33,7 @@ function barrier_mtd(beta_init, c_init, t_init, paramset)
         time_vec = [time_vec; time()-Time];
 
         # Check termination condition
-        if((((3n+1)/t) < eps_barrier)||(t>10^7))
+        if((((2n)/t) < eps_barrier)||(t>10^7))
             break;
         end
 
