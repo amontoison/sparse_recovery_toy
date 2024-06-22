@@ -1,0 +1,546 @@
+\documentclass[final,onefignum,onetabnum]{siamart190516}
+
+%% ------------------------------------------------------------------
+%% Code used in examples, needed to reproduce 
+%% ------------------------------------------------------------------
+%% Used for \set, used in an example below
+\usepackage{braket,amsfonts}
+
+%% Used in table example below
+\usepackage{array}
+
+%% Used in table and figure examples below
+\usepackage[caption=false]{subfig}
+%% Used for papers with subtables created with the subfig package
+\captionsetup[subtable]{position=bottom}
+\captionsetup[table]{position=bottom}
+
+%% Used for PgfPlots example, shown in the "Figures" section below.
+\usepackage{pgfplots}
+
+%% Used for creating new theorem and remark environments
+\newsiamthm{claim}{Claim}
+\newsiamremark{remark}{Remark}
+\newsiamremark{hypothesis}{Hypothesis}
+\crefname{hypothesis}{Hypothesis}{Hypotheses}
+
+%% Algorithm style, could alternatively use algpseudocode
+\usepackage{algorithmic}
+
+%% For figures
+\usepackage{graphicx,epstopdf}
+
+%% For referencing line numbers
+\Crefname{ALC@unique}{Line}{Lines}
+
+%% For creating math operators
+\usepackage{amsopn}
+\DeclareMathOperator{\Range}{Range}
+
+%% ------------------------------------------------------------------
+%% Macros for in-document examples. These are not meant to reused for
+%% SIAM journal papers.
+%% ------------------------------------------------------------------
+\usepackage{xspace}
+\usepackage{bold-extra}
+\usepackage[most]{tcolorbox}
+\newcommand{\BibTeX}{{\scshape Bib}\TeX\xspace}
+\newcounter{example}
+\colorlet{texcscolor}{blue!50!black}
+\colorlet{texemcolor}{red!70!black}
+\colorlet{texpreamble}{red!70!black}
+\colorlet{codebackground}{black!25!white!25}
+
+\newcommand\bs{\symbol{'134}} % print backslash in typewriter OT1/T1
+\newcommand{\preamble}[2][\small]{\textcolor{texpreamble}{#1\texttt{#2 \emph{\% <- Preamble}}}}
+
+\lstdefinestyle{siamlatex}{%
+  style=tcblatex,
+  texcsstyle=*\color{texcscolor},
+  texcsstyle=[2]\color{texemcolor},
+  keywordstyle=[2]\color{texemcolor},
+  moretexcs={cref,Cref,maketitle,mathcal,text,headers,email,url},
+}
+
+\tcbset{%
+  colframe=black!75!white!75,
+  coltitle=white,
+  colback=codebackground, % bottom/left side
+  colbacklower=white, % top/right side
+  fonttitle=\bfseries,
+  arc=0pt,outer arc=0pt,
+  top=1pt,bottom=1pt,left=1mm,right=1mm,middle=1mm,boxsep=1mm,
+  leftrule=0.3mm,rightrule=0.3mm,toprule=0.3mm,bottomrule=0.3mm,
+  listing options={style=siamlatex}
+}
+
+\newtcblisting[use counter=example]{example}[2][]{%
+  title={Example~\thetcbcounter: #2},#1}
+
+\newtcbinputlisting[use counter=example]{\examplefile}[3][]{%
+  title={Example~\thetcbcounter: #2},listing file={#3},#1}
+
+\DeclareTotalTCBox{\code}{ v O{} }
+{ %fontupper=\ttfamily\color{texemcolor},
+  fontupper=\ttfamily\color{black},
+  nobeforeafter,
+  tcbox raise base,
+  colback=codebackground,colframe=white,
+  top=0pt,bottom=0pt,left=0mm,right=0mm,
+  leftrule=0pt,rightrule=0pt,toprule=0mm,bottomrule=0mm,
+  boxsep=0.5mm,
+  #2}{#1}
+
+% Stretch the pages
+\patchcmd\newpage{\vfil}{}{}{}
+\flushbottom
+
+%% ------------------------------------------------------------------
+%% End of macros for in-document examples. 
+%% ------------------------------------------------------------------
+
+%% ------------------------------------------------------------------
+%% HEADING INFORMATION
+%% ------------------------------------------------------------------
+\begin{tcbverbatimwrite}{tmp_\jobname_header.tex}
+\title{Guide to Using SIAM's \LaTeX\ Style\thanks{Submitted to the editors DATE.
+\funding{Funding information goes here.}}}
+
+\author{Dianne Doe\thanks{Imagination Corp., Chicago, IL (\email{ddoe@imag.com}).}
+\and Paul T. Frank\thanks{Department of Applied Math, Fictional University, Boise, ID (\email{ptfrank@fictional.edu}, \email{jesmith@fictional.edu}).}
+\and Jane E. Smith\footnotemark[3]}
+
+% Custom SIAM macro to insert headers
+\headers{Guide to Using  SIAM'S \LaTeX\ Style}{Dianne Doe, Paul T. Frank, and Jane E. Smith}
+\end{tcbverbatimwrite}
+\input{tmp_\jobname_header.tex}
+
+% Optional: Set up PDF title and authors
+\ifpdf
+\hypersetup{ pdftitle={Guide to Using  SIAM'S \LaTeX\ Style} }
+\fi
+
+%% ------------------------------------------------------------------
+%% END HEADING INFORMATION
+%% ------------------------------------------------------------------
+
+%% ------------------------------------------------------------------
+%% MAIN Document
+%% ------------------------------------------------------------------
+\begin{document}
+\maketitle
+
+%% ------------------------------------------------------------------
+%% ABSTRACT
+%% ------------------------------------------------------------------
+\begin{tcbverbatimwrite}{tmp_\jobname_abstract.tex}
+\begin{abstract}
+  Documentation is given for use of the SIAM standard \LaTeX\ and \BibTeX\
+  macros.  Instructions and suggestions for compliance with SIAM style
+  standards are also included. Familiarity with standard \LaTeX\ commands is assumed.
+\end{abstract}
+
+\begin{keywords}
+  \LaTeX, \BibTeX, SIAM Journals, Documentation 
+\end{keywords}
+
+\begin{AMS}
+  00A20 
+\end{AMS}
+\end{tcbverbatimwrite}
+\input{tmp_\jobname_abstract.tex}
+%% ------------------------------------------------------------------
+%% END HEADER
+%% ------------------------------------------------------------------
+\section{Introduction}
+
+
+\section{Problem formalization}
+\subsection{1D signal}
+The model is as follows:
+\begin{equation}
+    \widehat{x} = ifft(v), \quad \widehat{z} = \widehat{x} + \widehat{e},
+\end{equation}
+where $v\in \mathbb{C}^n$ is the discrete Fourier transform (DFT) of the signal $x$, $\widehat{e}$ is the noise, and $\widehat{z}$ is the noisy signal we observe. 
+
+$v$ is DFT, so it follows some specific structures. The definition of $v$ is
+\begin{equation}
+    v_{i} = \frac{1}{\sqrt{N}}\sum_{j = 1}^N \omega^{(i-1)(j-1)} x_j,\text{ }\omega = e^{-\mathbf{i}2\pi\frac{1}{N}}.
+\end{equation}
+Based on the fact that when $N$ is an even number, $\omega^0 = 1$, $\omega^{\frac{N}{2}} = (-1)$, and $\omega^{i} = \overline{\omega^{N-i}}$ for $i = 1,\dots,\frac{N}{2}-1$, we know the DFT $v$ satisfies
+\begin{equation}
+    \begin{aligned}
+        &v_1 = \frac{1}{\sqrt{N}}\sum_{j = 1}^{N} \omega^{(1-1)(j-1)} x_j = \frac{1}{\sqrt{N}}\sum_{j=1}^{N} x_j\in \mathbb{R};\\
+        &v_{\frac{N}{2}+1} = \frac{1}{\sqrt{N}}\sum_{j = 1}^{N} \omega^{(\frac{N}{2}+1-1)(j-1)} x_j = \frac{1}{\sqrt{N}}\sum_{j=1}^{N} (-1)^{(j-1)} x_j \in \mathbb{R};\\
+        &v_{N+2-i} = \frac{1}{\sqrt{N}}\sum_{j = 1}^N \omega^{(N+2-i-1)(j-1)} x_j = \frac{1}{\sqrt{N}}\sum_{j=1}^N \overline{\omega}^{(i-1)(j-1)} x_j = \overline{v_i} \text{ for } i = 2,\dots, \frac{N}{2} 
+    \end{aligned}
+\end{equation}
+According to the structure of $v$ and ifft, we can write $ifft(v)$ as
+\begin{equation}
+\begin{aligned}
+    x_j &= \frac{1}{\sqrt{N}} \sum_{i=1}^N\overline{\omega}^{(j-1)(i-1)} v_i\\
+    & = \frac{1}{\sqrt{N}} \left(v_1 + (-1)^{(j-1)}v_{\frac{N}{2}+1}
+    + \sum_{i=2}^{\frac{N}{2}}\overline{\omega}^{(j-1)(i-1)}v_j + \sum_{i=\frac{N}{2}+2}^N \overline{\omega}^{(j-1)(i-1)}v_j\right)\\
+    & = \frac{1}{\sqrt{N}}\left(v_1 + (-1)^{(j-1)}v_{\frac{N}{2}+1}
+    + \sum_{i=2}^{\frac{N}{2}}\left(\overline{\omega}^{(j-1)(i-1)}v_j + \overline{\overline{\omega}^{(j-1)(i-1)}v_j}\right)\right)\\
+    & = \frac{1}{\sqrt{N}} \left(v_1 + (-1)^{(j-1)}v_{\frac{N}{2}+1}
+    + \sum_{i=2}^{\frac{N}{2}} 2Re\left(\overline{\omega}^{(j-1)(i-1)}v_j\right) \right)\\
+    & = \frac{1}{\sqrt{N}} \left(v_1 + (-1)^{(j-1)}v_{\frac{N}{2}+1}
+    + \sum_{i=2}^{\frac{N}{2}} 2Re\left(\overline{\omega}^{(j-1)(i-1)}\right)Re(v_j) - 2Im\left(\overline{\omega}^{(j-1)(i-1)}\right)Im(v_j)\right).
+\end{aligned}
+\end{equation}
+Thus, $x_j$ can be written as the inner product of two vectors. Denote
+\begin{equation}
+    A_j = [1, (-1)^{j-1}, \sqrt{2}Re\left(\overline{\omega}^{(j-1)(i-1)}\right) \text{ for }j = 2:N/2, -\sqrt{2}Im\left(\overline{\omega}^{(j-1)(i-1)}\right) \text{ for }j = 2:N/2]
+\end{equation}
+and 
+\begin{equation}\label{beta}
+    \beta = [v_1, v_{\frac{N}{2}+1}, \sqrt{2}Re(v_{2:N/2}),  \sqrt{2}Im(v_{2:N/2})]^\top.
+\end{equation}
+To sum up, let the $j-th$ row of $A\in\mathbb{R}^{n\times n}$ as $A_j$, then we have
+\begin{equation}
+    x = A\beta,
+\end{equation}
+and we can check that $A$ is an orthogonal matrix.
+
+Furthermore, the signal is also polluted by missing values. Without loss of generality, we assume the first $m$ elements in the signal is missing. $S = \{1,\dots,m\}$. Then what we can obverse is
+\begin{equation}
+    z = \widehat{z}_{\{1,\dots,n\}\backslash S},
+\end{equation}
+which is the noisy version of 
+\begin{equation}
+    x = \widehat{x}_{\{1,\dots,n\}\backslash S}.
+\end{equation}
+Correspondingly, we divide the orthogonal matrix $A$ as
+\begin{equation}
+    A = \begin{bmatrix}
+    M\\
+    M_{\perp}
+    \end{bmatrix},
+\end{equation}
+where $M$ is the first $m$ rows of $A$. Now the model becomes
+\begin{equation}
+    z = M_{\perp}\beta + e.
+\end{equation}
+Additionally, we assume sparsity on $v$. The one to one mapping between $v$ and $\beta$ shows $\beta$ is also sparse. Therefore, the final optimization problem is
+\begin{equation}
+    \min_{\beta}\|z - M_{\perp}\beta\|^2 \text{ s.t. }\|\beta\|_1\leq d.
+\end{equation}
+
+\subsection{Extension to 2D and 3D}
+
+\section{Algorithm}
+%This section introduces interior point method to solve the optimization problem (). Due to the orthogonality of $A$, 
+\subsection{Orthogonality of design matrix}
+The objective function of the optimization problem () is equivalent to
+\begin{equation}
+    f_0(\beta) =  \beta^{\top} M_{\perp}^{\top} M_{\perp}\beta -2\beta^{\top} M_{\perp}^{\top} z.
+\end{equation}
+Storing $M_{\perp}$ is implausible in large-scale setting. Fortunately, this problem can be bypassed due to the othorgonality of $A$ and the structure of Fourier transform.
+
+The first term in $f_0(\beta)$ can be replaced by 
+\begin{equation}
+    \beta^{\top} M_{\perp}^{\top} M_{\perp}\beta = \beta^{\top}(\mathbf{I_n}-M^{\top}M)\beta = \beta^{\top}\beta - \beta^{\top}M^{\top}M\beta.
+\end{equation}
+Thus, $M_{\perp}$ is not needed as long as $M_{\perp}^{\top}z$ can be computed without storing $M_{\perp}$.
+The orthogonality of $A$ also suggests that there exists a unique vector $u\in \mathcal{R}^{n}$ such that
+\begin{equation}\label{u}
+    M_{\perp}u = z, Mu = 0.
+\end{equation}
+Surprisingly, $u$ is nothing but $M_{\perp}^{\top}z$. This can be seen from
+\begin{equation}
+    u = \mathbf{I_n}u = M_{\perp}^{\top} M_{\perp}u +  M^{\top}Mu = M_{\perp}^{\top}z + M^{\top}0 = M_{\perp}^{\top}z.
+\end{equation}
+
+Denote $\widetilde{z} = (0^{\top}, z^{\top})^{\top}$, i.e. $\widetilde{z}$ imputes the missing values in the signal with 0, (\ref{u}) can be written as $Au = \widetilde{z}$. Moreover, there exists a unique DFT $v$ which satisfying the mapping $Au = IFFT(v)$ by Section (). Hence, $v$ can be solved via Fourier transform on $\widetilde{z}$
+\begin{equation}
+    v = IFFT(Au) = IFFT(\widetilde{z}).
+\end{equation}
+Finally, $u$ can be obtained through the one-to-one mapping between $u$ and $v$.
+
+\subsection{Interior point method}
+Epigraph technique can rewrite the nonlinear constraint $\|\beta\|_1\leq d$ as linear constraint, thus the optimization problem () is the same as
+\begin{equation}
+    \begin{aligned}
+    \min_{\beta, c}& \beta^\top M_{\perp}^\top M_{\perp}\beta-2\beta^\top M_{\perp}^\top z\\
+    \text{s.t. }&-\beta_i- c_i\leq 0\\
+    &\beta_i-c_i\leq 0\\
+    &-c_i\leq 0\\
+    &\sum_{i=1}^n c_i\leq d    
+    \end{aligned}
+\end{equation}
+Denote
+\begin{equation}\label{func_val}
+    \begin{aligned}
+        f_0(\beta, c) &= \beta^\top M_{\perp}^\top M_{\perp}\beta-2\beta^\top M_{\perp}^\top z \\
+    l_i(\beta, c) &= -\beta_i-c_i = -\beta^\top e_i-c^\top e_i, i = 1,\dots, n\\
+    u_i(\beta, c) &= \beta_i - c_i = \beta^\top e_i - c^\top e_i, i = 1, \dots, n\\    
+    h_i(\beta, c) &= -c_i = -c^\top e_i, i = 1, \dots, n\\
+    g(\beta, c) &= \sum_{i=1}^n c_i - d = c^\top \mathbf{1} - d
+    \end{aligned}
+\end{equation}
+where $e_i$ refers to the vector with all zero entries except that the $i-th$ entry is 1. Let
+\begin{equation}
+    \phi(\beta, c) = -\sum_{i=1}^n \log (l_i(\beta, c)) - \sum_{i=1}^n \log (u_i(\beta, c)) - \sum_{i=1}^n \log (h_i(\beta, c)) -\log (g(\beta, c)).
+\end{equation}
+The objective function of interior point method is $\psi(\beta,c;t) = tf_0(\beta, c) + \phi(\beta, c)$ for different $t$.
+
+(??Perhaps an introduction/some intuition of interior point method should be introduced.) The interior point method (citation needed) is given as follows.
+\begin{algorithm}[H]
+\caption{Barrier method}
+\label{alg: barrier method}
+\begin{algorithmic}
+\STATE {given initial values $\beta = (0,\dots,0), c = (d/2n,\dots,d/2n), t = 1$, tolerance $\epsilon>0$} 
+\STATE \textbf{repeat}
+\STATE 1. Centering step: compute $\beta^*(t), c^*(t)$ by minimizing $tf_0+\phi$ using \textbf{Newton's method}, starting at $\beta, c$
+\STATE 2. Update: $\beta = \beta^*(t), c = c^*(t)$
+\STATE 3. Stopping criterion: \textbf{quit} if $(3n+1)/t<\epsilon$
+\STATE 4. Increase $t$: $t = \mu t$
+\end{algorithmic}
+\end{algorithm}
+The Newton's method (citation needed) plays the vital role in the minimization of centering step. (?? Perhaps we also need to explain Newton's method a little bit.) Its algorithm is listed below.
+\begin{algorithm}[H]
+\caption{Newton's method}
+\label{alg: newton's method}
+\begin{algorithmic}
+\STATE {given starting point $\beta, c \in \text{ dom}(\psi(\beta, c; t))$, tolerance $\epsilon>0$} 
+\STATE \textbf{repeat}
+\STATE 1.Compute the Newton step and decrement $\Delta \beta, \Delta c, \lambda(\beta, c)^2$
+\STATE 2. Stopping criterion: \textbf{quit} if $\lambda^2/2<\epsilon$
+\STATE 3. Line search: Choose step size $t$ by backtracking line search.
+\STATE 4. Update. $\beta := \beta + t\Delta\beta, c:=c+t\Delta c$
+\end{algorithmic}
+\end{algorithm}
+where the Newton direction and the decrement is defined as
+\begin{equation}\label{DeltaNTdef}
+    \begin{aligned}
+    &\begin{bmatrix}
+    \Delta \beta\\
+    \Delta c
+    \end{bmatrix} = -(\nabla^2_{\beta,c} \psi(\beta,c;t))^{-1}
+    \begin{bmatrix}
+    \nabla_{\beta}\psi(\beta,c;t)\\
+    \nabla_c\psi(\beta,c;t).
+    \end{bmatrix}\\
+    & \lambda_{\beta, c}^2 = -\nabla_{\beta} \psi^{\top}\Delta\beta - \nabla_{c} \psi^{\top}\Delta c
+    \end{aligned}
+\end{equation}
+(??The notation $\nabla^2_{\beta,c} \psi(\beta,c;t)$ might not be very appropriate. It needs revision later.)
+
+(?? Perhaps the backtracking line search should also be introduced.)
+\subsection{Computation details}
+The main computation cost comes from the computation of the Newton direction. It involves the computation of the Hessian inverse and the gradient which can be seen from its definition (\ref{DeltaNTdef}). However, we don't need to take the inverse of Hessian and store it. Later we will show that the computation of Newton direction only requires the matrix-vector multiplication, Hardmard product, and the inverse of a $m\times m$ matrix.
+\subsubsection{Gradient}
+The gradient of $\psi(\beta,c)$ can be decomposed as $\nabla_{\beta}\psi = t\nabla_{\beta} f_0 + \nabla_{\beta}\phi$ and $\nabla_{c}\psi = t\nabla_{c} f_0 + \nabla_{c}\phi$. $\nabla f_0$ is easy to compute
+\begin{equation}
+    \begin{bmatrix}
+    \nabla_{\beta} f_0\\
+    \nabla_{c} f_0
+    \end{bmatrix} = \begin{bmatrix}-2M_{\perp}^\top z + 2\beta - 2 M^\top M)\beta\\ 0\end{bmatrix}.
+\end{equation}
+The gradient of $\phi(\beta,c)$ satisfies
+\begin{equation}
+    \nabla \phi = \sum_{i=1}^n\frac{1}{-l_i}\nabla l_i + \sum_{i=1}^n\frac{1}{-u_i}\nabla u_i + \sum_{i=1}^n\frac{1}{-h_i}\nabla h_i + \frac{1}{-g}\nabla g.
+\end{equation}
+Plugging the terms
+\begin{equation}
+     \nabla l_i = \begin{bmatrix}-e_i\\-e_i\end{bmatrix}, 
+    \nabla u_i = \begin{bmatrix}e_i\\-e_i\end{bmatrix},
+    \nabla h_i = \begin{bmatrix}0\\-e_i\end{bmatrix},
+    \nabla g = \begin{bmatrix}0\\\mathbf{1}\end{bmatrix},
+\end{equation}
+we can obtain
+\begin{equation}
+    \begin{bmatrix}
+    \nabla_{\beta}\phi\\
+    \nabla_{c}\phi
+    \end{bmatrix} = \begin{bmatrix} \frac{1}{l} - \frac{1}{u} \\ \frac{1}{l} + \frac{1}{u} + \frac{1}{h} - \frac{1}{g}\mathbf{1}\end{bmatrix},
+\end{equation}
+where $l = (l_1,\dots,l_n)^\top$ and $\frac{1}{l} = (1/l_1,\dots,1/l_n)^\top$. $u$ and $h$ are defined in the same way.
+
+\subsubsection{Hessian inverse}\label{sechessianinverse}
+We first compute the Hessian matrix.
+\begin{equation}
+    \nabla^2 f_0 = \begin{bmatrix} 2(\mathbf{I}_n-M^\top M) &0\\0 &0\end{bmatrix}.
+\end{equation}
+Moreover,
+\begin{equation}
+\begin{aligned}
+    \nabla^2 \phi &= \sum_{i=1}^n
+\frac{1}{l_i^2}\nabla l_i\nabla l_i^\top + \sum_{i=1}^n
+\frac{1}{u_i^2}\nabla u_i\nabla u_i^\top + \sum_{i=1}^n
+\frac{1}{h_i^2}\nabla h_i\nabla h_i^\top + \frac{1}{g^2} \nabla g\nabla g^\top\\
+&= \sum_{i=1}^n
+\frac{1}{l_i^2}\begin{bmatrix} E_{ii} & E_{ii}\\ E_{ii} &E_{ii}\end{bmatrix} + \sum_{i=1}^n
+\frac{1}{u_i^2}\begin{bmatrix} E_{ii} & -E_{ii}\\ -E_{ii} &E_{ii}\end{bmatrix} + \sum_{i=1}^n
+\frac{1}{h_i^2}\begin{bmatrix} 0 & 0\\ 0 &E_{ii}\end{bmatrix} + \frac{1}{g^2} \begin{bmatrix} 0 & 0\\ 0 &\mathbf{1}\mathbf{1}^T\end{bmatrix}\\
+&=\begin{bmatrix} \text{diag}^*(\frac{1}{l^2}+\frac{1}{u^2}) &  \text{diag}^*(\frac{1}{l^2}-\frac{1}{u^2})\\
+\text{diag}^*(\frac{1}{l^2}-\frac{1}{u^2}) & \text{diag}^*(\frac{1}{l^2}+\frac{1}{u^2}+\frac{1}{h^2}) + \frac{1}{g^2}\mathbf{1}\mathbf{1}^\top\end{bmatrix},
+\end{aligned}
+\end{equation}
+where $E_{ii}$ is a matrix with all the entries 0 but the entry at the i-th row and i-th column equals 1. The operator $\text{diag}^*$ is the adjoint operator of $\text{diag}$ and
+\begin{equation}
+    \text{diag}^*(d)=\begin{bmatrix}
+d_1 & 0  & \cdots   & 0   \\
+0 & d_2  & \cdots   & 0  \\
+\vdots & \vdots  & \ddots   & \vdots  \\
+0 & 0  & \cdots\  & d_n  \\
+\end{bmatrix}.
+\end{equation}
+Therefore, the Hessian of $\psi(\beta,c;t)$ is 
+\begin{equation}
+    \begin{aligned}
+    \nabla^2\psi &= \begin{bmatrix} 2t\mathbf{I}_n + \text{diag}^*(\frac{1}{l^2}+\frac{1}{u^2}) &  \text{diag}^*(\frac{1}{l^2}-\frac{1}{u^2})\\
+\text{diag}^*(\frac{1}{l^2}-\frac{1}{u^2}) &  \text{diag}^*(\frac{1}{l^2}+\frac{1}{u^2}+\frac{1}{h^2}) + \frac{1}{g^2}\mathbf{1}\mathbf{1}^\top \end{bmatrix} - \begin{bmatrix} 2tM^\top M &0\\0&0\end{bmatrix}\\
+&=:L - \begin{bmatrix} \sqrt{2t}M^\top \\0\end{bmatrix} \begin{bmatrix} \sqrt{2t}M & 0\end{bmatrix}.
+\end{aligned}
+\end{equation}
+Sherman-Morrison formula (citation needed) shows
+\begin{equation}\label{Hessian_inv}
+     (\nabla^2\psi)^{-1} &= L^{-1} + L^{-1}\begin{bmatrix} \sqrt{2t}M^\top \\0\end{bmatrix}(I_k -\begin{bmatrix}\sqrt{2t}M &0\end{bmatrix}L^{-1}\begin{bmatrix} \sqrt{2t}M^\top\\ 0\end{bmatrix})^{-1}\begin{bmatrix} \sqrt{2t}M & 0\end{bmatrix} L^{-1}.
+\end{equation}
+Divide $L^{-1}$ into blocks
+\begin{equation}\label{L_inv_block}
+    L^{-1} = \begin{bmatrix} L^{-1}_{11} &L^{-1}_{12}\\
+    L^{-1}_{21} &L^{-1}_{22}\end{bmatrix},
+\end{equation}
+(\ref{Hessian_inv}) becomes
+\begin{equation}\label{H_inv}
+    \nabla^2(tf_0+\phi)^{-1} = L^{-1} + 
+    2t\begin{bmatrix} L^{-1}_{11}M^\top \\ L^{-1}_{21}M^\top\end{bmatrix}
+    (I_k-2t M L^{-1}_{11} M^\top)^{-1}\begin{bmatrix} M L^{-1}_{11} &M L^{-1}_{12}\end{bmatrix}.
+\end{equation}
+Now we comes to the computation of $L^{-1}$.
+\begin{equation}
+    \begin{aligned}
+        L &= \begin{bmatrix} 2t\mathbf{I}_n + \text{diag}^*(\frac{1}{l^2}+\frac{1}{u^2}) &  \text{diag}^*(\frac{1}{l^2}-\frac{1}{u^2})\\
+\text{diag}^*(\frac{1}{l^2}-\frac{1}{u^2}) &  \text{diag}^*(\frac{1}{l^2}+\frac{1}{u^2}+\frac{1}{h^2}) \end{bmatrix}+ \begin{bmatrix}
+0\\ \frac{1}{g}\mathbf{1}
+\end{bmatrix} \begin{bmatrix}
+0 &\frac{1}{g}\mathbf{1}^\top
+\end{bmatrix}\\
+&=: \widetilde{L} + \begin{bmatrix}
+0\\ \frac{1}{g}\mathbf{1}
+\end{bmatrix} \begin{bmatrix}
+0 &\frac{1}{g}\mathbf{1}^\top
+\end{bmatrix}
+    \end{aligned}
+\end{equation}
+Sherman-Morrison formula is again applied to $L^{-1}$.
+\begin{equation}\label{L_inv}
+    L^{-1} = \widetilde{L}^{-1}- \widetilde{L}^{-1}\begin{bmatrix}
+0\\ \frac{1}{g}\mathbf{1}
+\end{bmatrix}(1+\begin{bmatrix}
+0 &\frac{1}{g}\mathbf{1}
+\end{bmatrix}\widetilde{L}^{-1}\begin{bmatrix}
+0\\ \frac{1}{g}\mathbf{1}
+\end{bmatrix})^{-1}\begin{bmatrix}
+0 &\frac{1}{g}\mathbf{1}
+\end{bmatrix}\widetilde{L}^{-1}.
+\end{equation}
+$\widetilde{L}^{-1}$ can be computed via the formula of inverse block matrix. We note that $\widetilde{L}$ is a block matrix with 4 diagonal blocks $\widetilde{L} = \begin{bmatrix} A &B\\ C &D\end{bmatrix}$.
+\begin{equation}
+    A = \text{diag}^*(a), B = \text{diag}^*(b), C = \text{diag}^*(c), D = \text{diag}^*(d),
+\end{equation}
+where
+\begin{equation}
+    \begin{aligned}
+        a &= 2t + \frac{1}{l^2} + \frac{1}{u^2},\\
+        b &= \frac{1}{l^2} - \frac{1}{u^2},\\
+        c &= \frac{1}{l^2} - \frac{1}{u^2},\\
+        d &= \frac{1}{l^2} + \frac{1}{u^2} + \frac{1}{h^2}.
+    \end{aligned}
+\end{equation}
+(?? The definition of $\frac{1}{l^2}$ needs further explanation.) The formula of inverse block matrix tells us that
+\begin{equation}
+    \widetilde{L}^{-1} = \begin{bmatrix} A^{-1} + A^{-1}B(D-CA^{-1}B)^{-1}CA^{-1} &-A^{-1}B(D-CA^{-1}B)^{-1}\\ -(D-CA^{-1}B)^{-1}CA^{-1} &(D-CA^{-1}B)^{-1}\end{bmatrix} =: \begin{bmatrix}
+    \widetilde{L}^{-1}_{11} &\widetilde{L}^{-1}_{12}\\
+    \widetilde{L}^{-1}_{21} &\widetilde{L}^{-1}_{22}
+    \end{bmatrix}.
+\end{equation}
+Plugging in the definition of $A, B, C, D$, it turns out that $\widetilde{L}^{-1}$ is a block matrix with 4 diagonal blocks.
+\begin{equation}
+    \widetilde{L}^{-1}_{11} = \text{diag}^*(\widetilde{l}^{-1}_{11}), \widetilde{L}^{-1}_{12} = \widetilde{L}^{-1}_{21} = \text{diag}^*(\widetilde{l}^{-1}_{12}),
+    \widetilde{L}^{-1}_{22} = \text{diag}^*(\widetilde{l}^{-1}_{22}),
+\end{equation}
+where
+\begin{equation}
+        \begin{aligned}
+                        \widetilde{l}^{-1}_{22} &= \frac{1}{d - c\odot \frac{1}{a}\odot b}\\
+        \widetilde{l}^{-1}_{11} &= \frac{1}{a} + \frac{1}{a}\odot b \odot \widetilde{l}^{-1}_{22} \odot b \odot \frac{1}{a}\\
+                \widetilde{l}^{-1}_{12} &= \frac{1}{a}\odot b \odot \widetilde{l}^{-1}_{22}.
+    \end{aligned}
+\end{equation}
+Here $\odot$ means pointwise product. Finally we achieves $L^{-1}$
+\begin{equation}\label{L_inv_formula}
+    \begin{aligned}
+        L^{-1}_{11} &= \text{diag}^*(\widetilde{l}^{-1}_{11}) - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{12}\widetilde{l}^{-1}_{12}^\top\\
+        L^{-1}_{12} &= \text{diag}^*(\widetilde{l}^{-1}_{12}) - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{12}\widetilde{l}^{-1}_{22}^\top = (L^{-1}_{21})^{\top}\\
+        L^{-1}_{22} &= \text{diag}^*(\widetilde{l}^{-1}_{22}) - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{22}\widetilde{l}^{-1}_{22}^\top.
+    \end{aligned}
+\end{equation}
+\subsubsection{Computation of Newton direction}
+Although the Hessian inverse can be computed fast according to Section \ref{sechessianinverse}, storing a $n\times n$ matrix is not a wise choice. Actually, the Newton direction can be computed without storing the Hessian inverse directly.
+\begin{equation}
+    \begin{aligned}
+   &- \begin{bmatrix}
+    \Delta_{\beta}\\
+    \Delta_c
+    \end{bmatrix} = \left(\nabla^{2}\psi\right)^{-1} \begin{bmatrix}
+    \nabla_{\beta}\psi\\
+    \nabla_{c}\psi
+    \end{bmatrix} \\
+    &= \begin{bmatrix}
+    L^{-1}_{11} G_1 + L^{-1}_{12} G_2 \\
+    L^{-1}_{21} G_1 + L^{-1}_{22} G_2
+    \end{bmatrix} + 
+    2t\begin{bmatrix} L^{-1}_{11}M^\top \\ L^{-1}_{21}M^\top\end{bmatrix}
+    (I_k-2t M L^{-1}_{11} M^\top)^{-1}M\left(L^{-1}_{11} G_1 + L^{-1}_{12} G_2\right) \\
+    &=: NT_1 + NT_2.
+\end{aligned}
+\end{equation}
+We first look at $NT_1$. With the formula (\ref{L_inv_formula}) for the blocks in $L^{-1}$, we have
+\begin{equation}\label{L11-1G1+L12-1G2}
+    \begin{aligned}
+            &L^{-1}_{11} G_1 + L^{-1}_{12} G_2\\
+            &= \widetilde{l}^{-1}_{11} \odot G_1 - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{12}\widetilde{l}^{-1}_{12}^\top G_1 + 
+            \widetilde{l}^{-1}_{12} \odot G_2 - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{12}\widetilde{l}^{-1}_{22}^\top G_2\\
+            & = \left(\widetilde{l}^{-1}_{11} \odot G_1 +\widetilde{l}^{-1}_{12} \odot G_2 \right) - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\left(\widetilde{l}^{-1}_{12}^\top G_1 + \widetilde{l}^{-1}_{22}^\top G_2\right)\widetilde{l}^{-1}_{12}.
+    \end{aligned}
+\end{equation}
+(?? The definition of $\odot$ between a matrix and a vector needs to be specified.) Similarly, the second half of $NT_1$ is
+\begin{equation}
+    \begin{aligned}
+            L^{-1}_{21} G_1 + L^{-1}_{22} G_2 &= \widetilde{l}^{-1}_{12} \odot G_1 - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{22}\widetilde{l}^{-1}_{12}^\top G_1 + 
+            \widetilde{l}^{-1}_{22} \odot G_2 - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{22}\widetilde{l}^{-1}_{22}^\top G_2\\
+            & = \left(\widetilde{l}^{-1}_{12} \odot G_1 +\widetilde{l}^{-1}_{22} \odot G_2 \right) - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\left(\widetilde{l}^{-1}_{12}^\top G_1 + \widetilde{l}^{-1}_{22}^\top G_2\right)\widetilde{l}^{-1}_{22}.
+    \end{aligned}
+\end{equation}
+The computation of $NT_2$ can be seen as a multiplication between a $n\times m$ matrix $[M(L_{11}^{-1})^{\top} M(L_{21}^{-1})^{\top}]^{\top}$ and a vector $\gamma := \left(I_k-2t M L^{-1}_{11} M^\top\right)^{-1}M\left(L^{-1}_{11} G_1 + L^{-1}_{12} G_2\right)$. We note that $\left(L^{-1}_{11} G_1 + L^{-1}_{12} G_2\right)$ is obtained from (\ref{L11-1G1+L12-1G2}). As long as we have the matrix $I_k-2t M L^{-1}_{11} M^\top$, we can use Cholesky decomposition to factorize it and then solve the linear equation to obtain $\gamma$:
+\begin{equation}
+    \left(I_k-2t M L^{-1}_{11} M^\top\right)\gamma = M\left(L^{-1}_{11} G_1 + L^{-1}_{12} G_2\right).
+\end{equation}
+The core step of computing $I_k-2t M L^{-1}_{11} M^\top$ is the multiplication $M L^{-1}_{11}$
+\begin{equation}
+    \begin{aligned}
+             M L^{-1}_{11} &= M\cdot \operatorname{diag}^{*}\left(\widetilde{l}_{11}^{-1}\right)-M\cdot\frac{1}{g^{2}+1^{\top} \widetilde{l}_{22}^{-1}} \widetilde{l}_{12}^{-1} \widetilde{l}_{12}^{-1 \top}   \\
+    &= M\odot \widetilde{l}_{11}^{-1} - \frac{1}{g^{2}+1^{\top}} \left(M\widetilde{l}_{12}^{-1}\right)\widetilde{l}_{12}^{-1 \top}.
+    \end{aligned}
+\end{equation}
+(?? The definition of $\odot$ between a matrix and a vector needs to be specified.)Thus,
+\begin{equation}
+ I_k-2t M L^{-1}_{11} M^\top = I_k-2t \left(M L^{-1}_{11}\right) M^\top.  \end{equation}
+ $L_{21}^{-1}$ can be computed in the similar way, so we have
+ \begin{equation}
+      NT_2 = 2t\cdot \begin{bmatrix} L^{-1}_{11}M^\top\\L^{-1}_{21}M^\top  \end{bmatrix} \gamma.
+ \end{equation}
+
+\section{Numerical results}
+
+\section{Conclusion and discussion}
+
+
+\bibliographystyle{siamplain}
+\bibliography{references}
+
+\end{document}
