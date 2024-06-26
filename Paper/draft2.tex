@@ -1,0 +1,559 @@
+\documentclass[final,onefignum,onetabnum]{siamart190516}
+
+%% ------------------------------------------------------------------
+%% Code used in examples, needed to reproduce 
+%% ------------------------------------------------------------------
+%% Used for \set, used in an example below
+\usepackage{braket,amsfonts}
+
+%% Used in table example below
+\usepackage{array}
+
+%% Used in table and figure examples below
+\usepackage[caption=false]{subfig}
+%% Used for papers with subtables created with the subfig package
+\captionsetup[subtable]{position=bottom}
+\captionsetup[table]{position=bottom}
+
+%% Used for PgfPlots example, shown in the "Figures" section below.
+\usepackage{pgfplots}
+
+%% Used for creating new theorem and remark environments
+\newsiamthm{claim}{Claim}
+\newsiamremark{remark}{Remark}
+\newsiamremark{hypothesis}{Hypothesis}
+\crefname{hypothesis}{Hypothesis}{Hypotheses}
+
+%% Algorithm style, could alternatively use algpseudocode
+\usepackage{algorithmic}
+
+%% For figures
+\usepackage{graphicx,epstopdf}
+
+%% For referencing line numbers
+\Crefname{ALC@unique}{Line}{Lines}
+
+%% For creating math operators
+\usepackage{amsopn}
+\DeclareMathOperator{\Range}{Range}
+
+%% ------------------------------------------------------------------
+%% Macros for in-document examples. These are not meant to reused for
+%% SIAM journal papers.
+%% ------------------------------------------------------------------
+\usepackage{xspace}
+\usepackage{bold-extra}
+\usepackage[most]{tcolorbox}
+\newcommand{\BibTeX}{{\scshape Bib}\TeX\xspace}
+\newcounter{example}
+\colorlet{texcscolor}{blue!50!black}
+\colorlet{texemcolor}{red!70!black}
+\colorlet{texpreamble}{red!70!black}
+\colorlet{codebackground}{black!25!white!25}
+
+\newcommand\bs{\symbol{'134}} % print backslash in typewriter OT1/T1
+\newcommand{\preamble}[2][\small]{\textcolor{texpreamble}{#1\texttt{#2 \emph{\% <- Preamble}}}}
+
+\lstdefinestyle{siamlatex}{%
+  style=tcblatex,
+  texcsstyle=*\color{texcscolor},
+  texcsstyle=[2]\color{texemcolor},
+  keywordstyle=[2]\color{texemcolor},
+  moretexcs={cref,Cref,maketitle,mathcal,text,headers,email,url},
+}
+
+\tcbset{%
+  colframe=black!75!white!75,
+  coltitle=white,
+  colback=codebackground, % bottom/left side
+  colbacklower=white, % top/right side
+  fonttitle=\bfseries,
+  arc=0pt,outer arc=0pt,
+  top=1pt,bottom=1pt,left=1mm,right=1mm,middle=1mm,boxsep=1mm,
+  leftrule=0.3mm,rightrule=0.3mm,toprule=0.3mm,bottomrule=0.3mm,
+  listing options={style=siamlatex}
+}
+
+\newtcblisting[use counter=example]{example}[2][]{%
+  title={Example~\thetcbcounter: #2},#1}
+
+\newtcbinputlisting[use counter=example]{\examplefile}[3][]{%
+  title={Example~\thetcbcounter: #2},listing file={#3},#1}
+
+\DeclareTotalTCBox{\code}{ v O{} }
+{ %fontupper=\ttfamily\color{texemcolor},
+  fontupper=\ttfamily\color{black},
+  nobeforeafter,
+  tcbox raise base,
+  colback=codebackground,colframe=white,
+  top=0pt,bottom=0pt,left=0mm,right=0mm,
+  leftrule=0pt,rightrule=0pt,toprule=0mm,bottomrule=0mm,
+  boxsep=0.5mm,
+  #2}{#1}
+
+% Stretch the pages
+\patchcmd\newpage{\vfil}{}{}{}
+\flushbottom
+
+%% ------------------------------------------------------------------
+%% End of macros for in-document examples. 
+%% ------------------------------------------------------------------
+
+%% ------------------------------------------------------------------
+%% HEADING INFORMATION
+%% ------------------------------------------------------------------
+\begin{tcbverbatimwrite}{tmp_\jobname_header.tex}
+\title{Guide to Using SIAM's \LaTeX\ Style\thanks{Submitted to the editors DATE.
+\funding{Funding information goes here.}}}
+
+\author{Dianne Doe\thanks{Imagination Corp., Chicago, IL (\email{ddoe@imag.com}).}
+\and Paul T. Frank\thanks{Department of Applied Math, Fictional University, Boise, ID (\email{ptfrank@fictional.edu}, \email{jesmith@fictional.edu}).}
+\and Jane E. Smith\footnotemark[3]}
+
+% Custom SIAM macro to insert headers
+\headers{Guide to Using  SIAM'S \LaTeX\ Style}{Dianne Doe, Paul T. Frank, and Jane E. Smith}
+\end{tcbverbatimwrite}
+\input{tmp_\jobname_header.tex}
+
+% Optional: Set up PDF title and authors
+\ifpdf
+\hypersetup{ pdftitle={Guide to Using  SIAM'S \LaTeX\ Style} }
+\fi
+
+%% ------------------------------------------------------------------
+%% END HEADING INFORMATION
+%% ------------------------------------------------------------------
+
+%% ------------------------------------------------------------------
+%% MAIN Document
+%% ------------------------------------------------------------------
+\begin{document}
+\maketitle
+
+%% ------------------------------------------------------------------
+%% ABSTRACT
+%% ------------------------------------------------------------------
+\begin{tcbverbatimwrite}{tmp_\jobname_abstract.tex}
+\begin{abstract}
+We present a method of identifying the sparsity of Discrete Fourier transform (DFT) when the signal is noisy. In particular, we consider the case where signal has some missing values. The conjugate structure of DFT makes the optimization in complex field difficult, so we transfer the problem to LASSO in real field. We introduce how to apply interior point method to solve LASSO. Besides, the orthogonal structure of inverse Discrete Fourier transform (IDFT) allows us to greatly reduced the storage. Also the operations of computing Newton direction is linear in problem size. Thus, our method is practical and scalable. 
+\end{abstract}
+
+\begin{keywords}
+  \LaTeX, \BibTeX, SIAM Journals, Documentation 
+\end{keywords}
+
+\begin{AMS}
+  00A20 
+\end{AMS}
+\end{tcbverbatimwrite}
+\input{tmp_\jobname_abstract.tex}
+%% ------------------------------------------------------------------
+%% END HEADER
+%% ------------------------------------------------------------------
+\section{Introduction}
+The Discrete Fourier Transform (DFT) reveals the frequency information of the signal. It plays important roles in many applications, such as audio and video processing, GPS, medical imaging and so on. The Fast Fourier Transform (FFT), one of the most important algorithm developed in the 20th century, can compute the DFT very fast, which makes DFT possible on large-scale problems. While in some real application settings, we are not interested in the full information in frequency domain. For example, most of the energy is (approximately) spread in only several spikes, i.e. the DFT is sparse. Leveraging the sparsity of DFT, \cite{hassanieh2012simple} brought up an algorithm called sparse Fast Fourier Transform (sFFT). sFFT computes even faster than FFT for identifying the sparse DFT. The theoretical guarantee for the approximation error is given in \cite{hassanieh2012nearly}. sFFT can not only achieve exact sparse DFT recovery, it can also deal with the cases with approximately sparsity. For example, the observed signal is polluted by some noise, thus cause the exact sparsity to be approximate. However, we sometimes also have missing value problems in the signal. It is not an obvious solution for sFFT.
+
+We deal with this problem by minimizing the sum of errors between the observed signal values and predicted values under the sparsity assumption on the DFT. Unfortunately the complex optimization problem is difficult to solve especially when we consider the specific structure of DFT. Therefore, we construct a mapping between a complex optimization problem and LASSO\cite{tibshirani1996regression}.
+
+Considering the possible convergence issue of ADMM, we instead use interior point method to solve LASSO. Besides, taking advantage of the structure of inverse DFT, the storage can be greatly reduced. Furthermore, the operations for each iteration is linear in the problem size.
+
+This paper is organized as follows. Section 2 introduces all the notations. Section 3 shows how we formulate the optimization problem. Section 4 introduces the algorithm and the computation details. Section 5 summarizes our contribution and discusses the possible future work.
+
+\section{Notations}
+
+\section{$l_1$ optimization problem formalization}
+\label{sec:probemformalization}
+This section specifies the sparse Discrete Fourier Transform (DFT) recovery problem and shows its equivalence to a $l_1$ optimization problem.
+
+\subsection{Sparse DFT recovery problem}
+\label{subsec:sparseDFTrecovery}
+The signal is denoted as $\widetilde{x}$ and the corresponding DFT is denoted as $v$. The transform between $\widetilde{x}$ and $v$ can be expressed as
+\begin{equation}
+    v = fft(\widetilde{x}) \iff \widetilde{x} = ifft(v),
+\end{equation}
+where $\widetilde{x}\in \mathbb{R}^n$, $v\in \mathbb{C}^n$, and $fft$ and $ifft$ represents DFT and inverse DFT respectively.
+
+
+Sparsity assumption  on DFT $v$ is imposed, which aligns with many applications in real life. For example, the signal contains only several frequencies, or only the first several dominant frequencies are of interest.
+
+The observed signal $\widetilde{z}\in \mathbb{R}^n$ is a noisy version of $\widetilde{x}$. The noise model follows
+\begin{equation}
+    \widetilde{z} = \widetilde{x} + \widetilde{e},
+\end{equation}
+where $\widetilde{e}\in\mathbb{R}^n$ is the noise. Furthermore, missing values in signal is taken into account. Suppose the missing indices are recorded in a set $\mathcal{M}$. Without loss of generality, let $\mathcal{M} = \{1,2,\dots,m\}$. For simplicity, we denote our observed signal as
+\begin{equation}
+    z:=\widetilde{z}_{[n]\backslash\mathcal{M}}, x:=\widetilde{x}_{[n]\backslash\mathcal{M}},
+    e:=\widetilde{e}_{[n]\backslash\mathcal{M}}.
+\end{equation}
+In order to recover $v$, we use $l_2$ loss function to formalize the optimization problem:
+\begin{equation}\label{complexopt}
+    v = \arg\min_{v}\left\|z - \left(ifft(v)\right)_{[n]\backslash\mathcal{M}}\right\|_2 \text{ s.t. }\|v\|_1 \leq d,
+\end{equation}
+where the constraint on $v$ characterize the sparsity of $v$ to some extent.
+
+\subsection{Equivalence to LASSO}
+Although we formalize the optimization problem (\ref{complexopt}), how to solve it is not obvious due to the constraint on $v$. Thus, we construct a mapping $f:(v, ifft)\rightarrow (A,\beta)$ such that $ifft(v) = A\beta$, where $A\in \mathbb{R}^{n\times n}$ is an orthogonal matrix and $\beta\in \mathbb{R}^n$ is a vector. Considering the missing values, we divide the rows of $A$ into two groups based on whether the index in the signal is missing. That is to say,
+\begin{equation}
+    M = A_{\mathcal{M}}\text{ and }M_{\perp} = A_{[n]\backslash\mathcal{M}}.
+\end{equation}
+Next, we illustrate the construction of the mapping $f$. The $j^{th}$ row of $A$ is defined as
+\begin{equation}\label{A}
+    A_j = \frac{1}{\sqrt{n}}[1, (-1)^j, \sqrt{2}Re\left(\overline{\omega}^{jk}\right) \text{ for }k = 0:\frac{n}{2}-1, -\sqrt{2}Im\left(\overline{\omega}^{jk}\right) \text{ for }k = 0:\frac{n}{2}-1]
+\end{equation}
+The vector $\beta$ is defined as
+\begin{equation}\label{beta}
+    \beta = [v_0, v_{\frac{n}{2}}, \sqrt{2}Re(v_{1:\frac{n}{2}-1}),  \sqrt{2}Im(v_{1:\frac{n}{2}})]^\top.
+\end{equation}
+Finally we verify that $A\beta = ifft(v)$. The definition of DFT is
+\begin{equation}
+    v_{k} = \frac{1}{\sqrt{n}}\sum_{j=0}^{n-1}\overline{\omega}^{kj}x_j,
+\end{equation}
+where $\omega = e^{-\mathbf{i}\frac{2\pi}{n}}$. $\omega$ has the properties: $\omega^{0} = 1$, $\omega^{\frac{n}{2}}= -1$, and $\omega^{j} = \overline{\omega}^{n-j}$ for $j = 1,\dots,\frac{n}{2}-1$. DFT $v$ thus has the structure: $v_0\in\mathbb{R}$, $v_{\frac{n}{2}}\in\mathbb{R}$, and $v_{n-j} = \overline{v_j}$ for $j = 1,\dots,\frac{n}{2}-1$. We compare $A\beta$ and $ifft(v)$ elementwisely.
+\begin{equation}
+\begin{aligned}
+    \left(ifft(v)\right)_j &= \frac{1}{\sqrt{n}}\sum_{k=0}^{n-1}\omega^{jk}v_k =\frac{1}{\sqrt{n}}\left(v_0 + (-1)^j v_{\frac{n}{2}} +\sum_{k=0}^{\frac{n}{2}-1}\omega^{jk}v_k + \sum_{k=\frac{n}{2}+1}^{n-1}\omega^{jk}v_k\right)\\
+    & = \frac{1}{\sqrt{n}}\left(v_0 + (-1)^j v_{\frac{n}{2}} +\sum_{k=0}^{\frac{n}{2}-1}\omega^{jk}v_k + \sum_{k=0}^{\frac{n}{2}-1}\overline{\omega}^{jk}\overline{v_k}\right)\\
+    &= \frac{1}{\sqrt{n}}\left(v_0 + (-1)^j v_{\frac{n}{2}} +\sum_{k=0}^{\frac{n}{2}-1}2Re(\omega^{jk}v_k)\right)\\
+    &=\frac{1}{\sqrt{n}}\left(v_0 + (-1)^j v_{\frac{n}{2}} +\sum_{k=0}^{\frac{n}{2}-1}2Re(\omega^{jk})Re(v_k) -\sum_{k=0}^{\frac{n}{2}-1} 2Im(\omega^{jk})Im(v_k)\right)\\
+    &=A_j\beta
+\end{aligned}
+\end{equation}
+Thus, we have
+\begin{equation}
+    \left\|z - \left(ifft(v)\right)_{[n]\backslash\mathcal{M}}\right\|_2 = \|z-M_{\perp}\beta\|_2.
+\end{equation}
+Although $\|v\|_1$ does not equal to $\|\beta\|_1$ exactly, the sparsity on $v$ can impose the sparsity on $\beta$ and vice versa. From this perspective, we can rephrase the optimization problem as
+\begin{equation}\label{realopt}
+    \beta = \arg\min_{\beta}\|z-M_{\perp}\beta\|_2\text{ s.t. }\|\beta\|_1\leq d.
+\end{equation}
+This is a $l_1$ optimization problem in real area, which is also called LASSO. Finally, we point out that we can obtain an estimate of $v$ through the inverse mapping of $f$ as long as we get an estimate of $\beta$.
+\begin{equation}
+\begin{aligned}
+    v_0 &= \beta_0, v_{\frac{n}{2}} = \beta_1, \\
+    v_k &= (\beta_{k+1}+\textbf{im}\beta_{k+\frac{n}{2}})/\sqrt{2}\text{ for }k=1,\dots,\frac{n}{2}-1\\
+    v_{k} &= \overline{v_{n-k}}\text{ for }k=\frac{n}{2}+1,\dots,n-1
+\end{aligned}
+\end{equation}
+Therefore, how to solve optimization problem (\ref{realopt}) is the only part remains to be stated.
+
+\section{Computation}
+Interior point method can be used to solve (\ref{realopt}), which we will introduce in this section. Besides, the orthogonality of $A$ and the structure of ifft allows us to only store $M$ during the computation. 
+\subsection{Interior point method}
+Note the constraint $\|\beta\|_1$ is nondifferentiable, so we rephrase the constraint using epigraph technique. We introduce slack variable $c_0,\dots,c_{n-1}$ and rewrite the constraint as
+\begin{equation}
+   \|\beta\|_1\leq d \iff
+    \begin{aligned}
+    &-\beta_i- c_i\leq 0\\
+    &\beta_i-c_i\leq 0\\
+    &-c_i\leq 0\\
+    &\sum_{i=1}^n c_i\leq d    
+    \end{aligned}
+\end{equation}
+Define
+\begin{equation}\label{func_val}
+    \begin{aligned}
+        f_0(\beta, c) &= \beta^\top M_{\perp}^\top M_{\perp}\beta-2\beta^\top M_{\perp}^\top z \\
+    l_i(\beta, c) &= -\beta_i-c_i = -\beta^\top e_i-c^\top e_i, i = 0,\dots, n-1\\
+    u_i(\beta, c) &= \beta_i - c_i = \beta^\top e_i - c^\top e_i, i = 0, \dots, n-1\\    
+    h_i(\beta, c) &= -c_i = -c^\top e_i, i = 0, \dots, n-1\\
+    g(\beta, c) &= \sum_{i=0}^{n-1} c_i - d = c^\top \mathbf{1} - d
+    \end{aligned}
+\end{equation}
+where $e_i$ refers to the vector with all zero entries except that the $i-th$ entry is 1. Now the optimization problem turns into
+\begin{equation}
+\begin{aligned}
+     &\min_{\beta,c} f_0(\beta,c)   \\
+     \text{s.t. } & l_i(\beta, c)\leq 0, u_i(\beta, c)\leq 0, h_i(\beta, c)\leq 0\text{ for }i=0,\dots,n-1\\
+     & g(\beta, c)\leq 0
+\end{aligned}
+\end{equation}
+Let
+\begin{equation}
+    \phi(\beta, c) = -\sum_{i=1}^n \log (l_i(\beta, c)) - \sum_{i=1}^n \log (u_i(\beta, c)) - \sum_{i=1}^n \log (h_i(\beta, c)) -\log (g(\beta, c)).
+\end{equation}
+The objective function of interior point method is $\psi(\beta,c;t) = tf_0(\beta, c) + \phi(\beta, c)$ for different $t$.
+The interior point method (citation needed) is given as follows.
+\begin{algorithm}[H]
+\caption{Barrier method}
+\label{alg: barrier method}
+\begin{algorithmic}
+\STATE {given initial values $\beta = (0,\dots,0), c = (d/2n,\dots,d/2n), t = 1$, tolerance $\epsilon>0$} 
+\STATE \textbf{repeat}
+\STATE 1. Centering step: compute $\beta^*(t), c^*(t)$ by minimizing $tf_0+\phi$ using \textbf{Newton's method}, starting at $\beta, c$
+\STATE 2. Update: $\beta = \beta^*(t), c = c^*(t)$
+\STATE 3. Stopping criterion: \textbf{quit} if $(3n+1)/t<\epsilon$
+\STATE 4. Increase $t$: $t = \mu t$
+\end{algorithmic}
+\end{algorithm}
+The Newton's method (citation needed) plays the vital role in the minimization of centering step. (?? Perhaps we also need to explain Newton's method a little bit.) Its algorithm is listed below.
+\begin{algorithm}[H]
+\caption{Newton's method}
+\label{alg: newton's method}
+\begin{algorithmic}
+\STATE {given starting point $\beta, c \in \text{ dom}(\psi(\beta, c; t))$, tolerance $\epsilon>0$} 
+\STATE \textbf{repeat}
+\STATE 1.Compute the Newton step and decrement $\Delta \beta, \Delta c, \lambda(\beta, c)^2$
+\STATE 2. Stopping criterion: \textbf{quit} if $\lambda^2/2<\epsilon$
+\STATE 3. Line search: Choose step size $t$ by backtracking line search.
+\STATE 4. Update. $\beta := \beta + t\Delta\beta, c:=c+t\Delta c$
+\end{algorithmic}
+\end{algorithm}
+where the Newton direction and the decrement is defined as
+\begin{equation}\label{DeltaNTdef}
+    \begin{aligned}
+    &\begin{bmatrix}
+    \Delta \beta\\
+    \Delta c
+    \end{bmatrix} = -(\nabla^2_{\beta,c} \psi(\beta,c;t))^{-1}
+    \begin{bmatrix}
+    \nabla_{\beta}\psi(\beta,c;t)\\
+    \nabla_c\psi(\beta,c;t).
+    \end{bmatrix}\\
+    & \lambda_{\beta, c}^2 = -\nabla_{\beta} \psi^{\top}\Delta\beta - \nabla_{c} \psi^{\top}\Delta c
+    \end{aligned}
+\end{equation}
+\subsection{Orthogonality of $A$}
+The computation lies in the calculation of function values, gradient, and Newton direction. Before we calculate the formula for them, we show how to compute the two terms $M_{\perp}^{\top}M_{\perp}$ and $M_{\perp}^{\top}z$ only storing $M$.
+
+$M_{\perp}^{\top}M_{\perp}$ comes directly from the orthogonality of $A$:
+\begin{equation}
+    M^{\top}M = \mathbf{I_n} -  M_{\perp}^{\top}M_{\perp}.
+\end{equation}
+The orthogonality of $A$ also suggests that there exists a unique vector $u\in \mathcal{R}^{n}$ such that
+\begin{equation}\label{u}
+    M_{\perp}u = z, Mu = 0.
+\end{equation}
+Surprisingly, $u$ is nothing but $M_{\perp}^{\top}z$. This can be seen from
+\begin{equation}
+    u = \mathbf{I_n}u = M_{\perp}^{\top} M_{\perp}u +  M^{\top}Mu = M_{\perp}^{\top}z + M^{\top}0 = M_{\perp}^{\top}z.
+\end{equation}
+Define $\widehat{z}$ as a vector where the missing values in $\widetilde{z}$ are replaced by 0, (\ref{u}) can be written as $Au = \widetilde{z}$. Moreover, the inverse mapping of $f$ can construct $v$ which satisfying the mapping $Au = IFFT(v)$ for each $u$. Hence, $v$ can be solved via Fourier transform on $\widetilde{z}$
+\begin{equation}
+    v = IFFT(Au) = IFFT(\widetilde{z}).
+\end{equation}
+Furthermore, $u$ can be obtained by taking the mapping $f$ on $v$. To sum up, the objective function thus becomes
+\begin{equation}
+    f_0 = \beta^{\top}\beta - (M\beta)^{\top}(M\beta) -2\beta^{\top}M_{\perp}^{\top}z,
+\end{equation}
+where $M_{\perp}^{\top}z$ does not involve $M_{\perp}$.
+\subsection{Computation details of gradient and Newton direction}
+\subsubsection{Gradient}
+The gradient of $\psi(\beta,c)$ can be decomposed as $\nabla_{\beta}\psi = t\nabla_{\beta} f_0 + \nabla_{\beta}\phi$ and $\nabla_{c}\psi = t\nabla_{c} f_0 + \nabla_{c}\phi$. $\nabla f_0$ is easy to compute
+\begin{equation}
+    \begin{bmatrix}
+    \nabla_{\beta} f_0\\
+    \nabla_{c} f_0
+    \end{bmatrix} = \begin{bmatrix}-2M_{\perp}^\top z + 2\beta - 2 M^\top (M\beta)\\ 0\end{bmatrix}.
+\end{equation}
+The gradient of $\phi(\beta,c)$ satisfies
+\begin{equation}
+    \nabla \phi = \sum_{i=1}^n\frac{1}{-l_i}\nabla l_i + \sum_{i=1}^n\frac{1}{-u_i}\nabla u_i + \sum_{i=1}^n\frac{1}{-h_i}\nabla h_i + \frac{1}{-g}\nabla g.
+\end{equation}
+Plugging the terms
+\begin{equation}
+     \nabla l_i = \begin{bmatrix}-e_i\\-e_i\end{bmatrix}, 
+    \nabla u_i = \begin{bmatrix}e_i\\-e_i\end{bmatrix},
+    \nabla h_i = \begin{bmatrix}0\\-e_i\end{bmatrix},
+    \nabla g = \begin{bmatrix}0\\\mathbf{1}\end{bmatrix},
+\end{equation}
+we can obtain
+\begin{equation}
+    \begin{bmatrix}
+    \nabla_{\beta}\phi\\
+    \nabla_{c}\phi
+    \end{bmatrix} = \begin{bmatrix} \frac{1}{l} - \frac{1}{u} \\ \frac{1}{l} + \frac{1}{u} + \frac{1}{h} - \frac{1}{g}\mathbf{1}\end{bmatrix},
+\end{equation}
+where $l = (l_1,\dots,l_n)^\top$ and $\frac{1}{l} = (1/l_1,\dots,1/l_n)^\top$. $u$ and $h$ are defined in the same way.
+\subsubsection{Hessian inverse}
+Newton direction computation needs the inverse of Hessian matrix. Thus, we first give an explicitly formula of Hessian inverse. We start from the Hessian matrix:
+\begin{equation}
+    \nabla^2 f_0 = \begin{bmatrix} 2(\mathbf{I}_n-M^\top M) &0\\0 &0\end{bmatrix}.
+\end{equation}
+Moreover,
+\begin{equation}
+\begin{aligned}
+    \nabla^2 \phi &= \sum_{i=1}^n
+\frac{1}{l_i^2}\nabla l_i\nabla l_i^\top + \sum_{i=1}^n
+\frac{1}{u_i^2}\nabla u_i\nabla u_i^\top + \sum_{i=1}^n
+\frac{1}{h_i^2}\nabla h_i\nabla h_i^\top + \frac{1}{g^2} \nabla g\nabla g^\top\\
+&= \sum_{i=1}^n
+\frac{1}{l_i^2}\begin{bmatrix} E_{ii} & E_{ii}\\ E_{ii} &E_{ii}\end{bmatrix} + \sum_{i=1}^n
+\frac{1}{u_i^2}\begin{bmatrix} E_{ii} & -E_{ii}\\ -E_{ii} &E_{ii}\end{bmatrix} + \sum_{i=1}^n
+\frac{1}{h_i^2}\begin{bmatrix} 0 & 0\\ 0 &E_{ii}\end{bmatrix} + \frac{1}{g^2} \begin{bmatrix} 0 & 0\\ 0 &\mathbf{1}\mathbf{1}^T\end{bmatrix}\\
+&=\begin{bmatrix} \text{diag}^*(\frac{1}{l^2}+\frac{1}{u^2}) &  \text{diag}^*(\frac{1}{l^2}-\frac{1}{u^2})\\
+\text{diag}^*(\frac{1}{l^2}-\frac{1}{u^2}) & \text{diag}^*(\frac{1}{l^2}+\frac{1}{u^2}+\frac{1}{h^2}) + \frac{1}{g^2}\mathbf{1}\mathbf{1}^\top\end{bmatrix},
+\end{aligned}
+\end{equation}
+where $E_{ii}$ is a matrix with all the entries 0 but the entry at the i-th row and i-th column equals 1. The operator $\text{diag}^*$ is the adjoint operator of $\text{diag}$ and
+\begin{equation}
+    \text{diag}^*(d)=\begin{bmatrix}
+d_1 & 0  & \cdots   & 0   \\
+0 & d_2  & \cdots   & 0  \\
+\vdots & \vdots  & \ddots   & \vdots  \\
+0 & 0  & \cdots\  & d_n  \\
+\end{bmatrix}.
+\end{equation}
+Therefore, the Hessian of $\psi(\beta,c;t)$ is 
+\begin{equation}
+    \begin{aligned}
+    \nabla^2\psi &= \begin{bmatrix} 2t\mathbf{I}_n + \text{diag}^*(\frac{1}{l^2}+\frac{1}{u^2}) &  \text{diag}^*(\frac{1}{l^2}-\frac{1}{u^2})\\
+\text{diag}^*(\frac{1}{l^2}-\frac{1}{u^2}) &  \text{diag}^*(\frac{1}{l^2}+\frac{1}{u^2}+\frac{1}{h^2}) + \frac{1}{g^2}\mathbf{1}\mathbf{1}^\top \end{bmatrix} - \begin{bmatrix} 2tM^\top M &0\\0&0\end{bmatrix}\\
+&=:L - \begin{bmatrix} \sqrt{2t}M^\top \\0\end{bmatrix} \begin{bmatrix} \sqrt{2t}M & 0\end{bmatrix}.
+\end{aligned}
+\end{equation}
+Sherman-Morrison formula can be applied to get the inverse due to the specific decomposition of Hessian matrix.
+\begin{equation}\label{Hessian_inv}
+     (\nabla^2\psi)^{-1} &= L^{-1} + L^{-1}\begin{bmatrix} \sqrt{2t}M^\top \\0\end{bmatrix}(I_k -\begin{bmatrix}\sqrt{2t}M &0\end{bmatrix}L^{-1}\begin{bmatrix} \sqrt{2t}M^\top\\ 0\end{bmatrix})^{-1}\begin{bmatrix} \sqrt{2t}M & 0\end{bmatrix} L^{-1}.
+\end{equation}
+Divide $L^{-1}$ into blocks
+\begin{equation}\label{L_inv_block}
+    L^{-1} = \begin{bmatrix} L^{-1}_{11} &L^{-1}_{12}\\
+    L^{-1}_{21} &L^{-1}_{22}\end{bmatrix},
+\end{equation}
+(\ref{Hessian_inv}) becomes
+\begin{equation}\label{H_inv}
+    \nabla^2(tf_0+\phi)^{-1} = L^{-1} + 
+    2t\begin{bmatrix} L^{-1}_{11}M^\top \\ L^{-1}_{21}M^\top\end{bmatrix}
+    (I_k-2t M L^{-1}_{11} M^\top)^{-1}\begin{bmatrix} M L^{-1}_{11} &M L^{-1}_{12}\end{bmatrix}.
+\end{equation}
+Now we comes to the computation of $L^{-1}$.
+\begin{equation}
+    \begin{aligned}
+        L &= \begin{bmatrix} 2t\mathbf{I}_n + \text{diag}^*(\frac{1}{l^2}+\frac{1}{u^2}) &  \text{diag}^*(\frac{1}{l^2}-\frac{1}{u^2})\\
+\text{diag}^*(\frac{1}{l^2}-\frac{1}{u^2}) &  \text{diag}^*(\frac{1}{l^2}+\frac{1}{u^2}+\frac{1}{h^2}) \end{bmatrix}+ \begin{bmatrix}
+0\\ \frac{1}{g}\mathbf{1}
+\end{bmatrix} \begin{bmatrix}
+0 &\frac{1}{g}\mathbf{1}^\top
+\end{bmatrix}\\
+&=: \widetilde{L} + \begin{bmatrix}
+0\\ \frac{1}{g}\mathbf{1}
+\end{bmatrix} \begin{bmatrix}
+0 &\frac{1}{g}\mathbf{1}^\top
+\end{bmatrix}
+    \end{aligned}
+\end{equation}
+Sherman-Morrison formula is again applied to $L^{-1}$.
+\begin{equation}\label{L_inv}
+    L^{-1} = \widetilde{L}^{-1}- \widetilde{L}^{-1}\begin{bmatrix}
+0\\ \frac{1}{g}\mathbf{1}
+\end{bmatrix}(1+\begin{bmatrix}
+0 &\frac{1}{g}\mathbf{1}
+\end{bmatrix}\widetilde{L}^{-1}\begin{bmatrix}
+0\\ \frac{1}{g}\mathbf{1}
+\end{bmatrix})^{-1}\begin{bmatrix}
+0 &\frac{1}{g}\mathbf{1}
+\end{bmatrix}\widetilde{L}^{-1}.
+\end{equation}
+$\widetilde{L}^{-1}$ can be computed via the formula of inverse block matrix. We note that $\widetilde{L}$ is a block matrix with 4 diagonal blocks $\widetilde{L} = \begin{bmatrix} A &B\\ C &D\end{bmatrix}$.
+\begin{equation}
+    A = \text{diag}^*(a), B = \text{diag}^*(b), C = \text{diag}^*(c), D = \text{diag}^*(d),
+\end{equation}
+where
+\begin{equation}
+    \begin{aligned}
+        a &= 2t + \frac{1}{l^2} + \frac{1}{u^2},\\
+        b &= \frac{1}{l^2} - \frac{1}{u^2},\\
+        c &= \frac{1}{l^2} - \frac{1}{u^2},\\
+        d &= \frac{1}{l^2} + \frac{1}{u^2} + \frac{1}{h^2}.
+    \end{aligned}
+\end{equation}
+(?? The definition of $\frac{1}{l^2}$ needs further explanation.) The formula of inverse block matrix tells us that
+\begin{equation}
+    \widetilde{L}^{-1} = \begin{bmatrix} A^{-1} + A^{-1}B(D-CA^{-1}B)^{-1}CA^{-1} &-A^{-1}B(D-CA^{-1}B)^{-1}\\ -(D-CA^{-1}B)^{-1}CA^{-1} &(D-CA^{-1}B)^{-1}\end{bmatrix} =: \begin{bmatrix}
+    \widetilde{L}^{-1}_{11} &\widetilde{L}^{-1}_{12}\\
+    \widetilde{L}^{-1}_{21} &\widetilde{L}^{-1}_{22}
+    \end{bmatrix}.
+\end{equation}
+Plugging in the definition of $A, B, C, D$, it turns out that $\widetilde{L}^{-1}$ is a block matrix with 4 diagonal blocks.
+\begin{equation}
+    \widetilde{L}^{-1}_{11} = \text{diag}^*(\widetilde{l}^{-1}_{11}), \widetilde{L}^{-1}_{12} = \widetilde{L}^{-1}_{21} = \text{diag}^*(\widetilde{l}^{-1}_{12}),
+    \widetilde{L}^{-1}_{22} = \text{diag}^*(\widetilde{l}^{-1}_{22}),
+\end{equation}
+where
+\begin{equation}
+        \begin{aligned}
+                        \widetilde{l}^{-1}_{22} &= \frac{1}{d - c\odot \frac{1}{a}\odot b}\\
+        \widetilde{l}^{-1}_{11} &= \frac{1}{a} + \frac{1}{a}\odot b \odot \widetilde{l}^{-1}_{22} \odot b \odot \frac{1}{a}\\
+                \widetilde{l}^{-1}_{12} &= \frac{1}{a}\odot b \odot \widetilde{l}^{-1}_{22}.
+    \end{aligned}
+\end{equation}
+Here $\odot$ means pointwise product. Finally we achieves $L^{-1}$
+\begin{equation}\label{L_inv_formula}
+    \begin{aligned}
+        L^{-1}_{11} &= \text{diag}^*(\widetilde{l}^{-1}_{11}) - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{12}\widetilde{l}^{-1}_{12}^\top\\
+        L^{-1}_{12} &= \text{diag}^*(\widetilde{l}^{-1}_{12}) - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{12}\widetilde{l}^{-1}_{22}^\top = (L^{-1}_{21})^{\top}\\
+        L^{-1}_{22} &= \text{diag}^*(\widetilde{l}^{-1}_{22}) - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{22}\widetilde{l}^{-1}_{22}^\top.
+    \end{aligned}
+\end{equation}
+\subsubsection{Newton direction}
+Although the Hessian inverse can be computed fast, storing a $n\times n$ matrix is not practical especially when the problem size is very large. Fortunately, we can compute the multiplication of Hessian inverse and gradient directly by plugging the explicit formula of Hessian inverse.
+\begin{equation}
+    \begin{aligned}
+   &- \begin{bmatrix}
+    \Delta_{\beta}\\
+    \Delta_c
+    \end{bmatrix} = \left(\nabla^{2}\psi\right)^{-1} \begin{bmatrix}
+    \nabla_{\beta}\psi\\
+    \nabla_{c}\psi
+    \end{bmatrix} \\
+    &= \begin{bmatrix}
+    L^{-1}_{11} G_1 + L^{-1}_{12} G_2 \\
+    L^{-1}_{21} G_1 + L^{-1}_{22} G_2
+    \end{bmatrix} + 
+    2t\begin{bmatrix} L^{-1}_{11}M^\top \\ L^{-1}_{21}M^\top\end{bmatrix}
+    (I_k-2t M L^{-1}_{11} M^\top)^{-1}M\left(L^{-1}_{11} G_1 + L^{-1}_{12} G_2\right) \\
+    &=: NT_1 + NT_2.
+\end{aligned}
+\end{equation}
+We first look at $NT_1$. With the formula (\ref{L_inv_formula}) for the blocks in $L^{-1}$, we have
+\begin{equation}\label{L11-1G1+L12-1G2}
+    \begin{aligned}
+            &L^{-1}_{11} G_1 + L^{-1}_{12} G_2\\
+            &= \widetilde{l}^{-1}_{11} \odot G_1 - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{12}\widetilde{l}^{-1}_{12}^\top G_1 + 
+            \widetilde{l}^{-1}_{12} \odot G_2 - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{12}\widetilde{l}^{-1}_{22}^\top G_2\\
+            & = \left(\widetilde{l}^{-1}_{11} \odot G_1 +\widetilde{l}^{-1}_{12} \odot G_2 \right) - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\left(\widetilde{l}^{-1}_{12}^\top G_1 + \widetilde{l}^{-1}_{22}^\top G_2\right)\widetilde{l}^{-1}_{12}.
+    \end{aligned}
+\end{equation}
+(?? The definition of $\odot$ between a matrix and a vector needs to be specified.) Similarly, the second half of $NT_1$ is
+\begin{equation}
+    \begin{aligned}
+            L^{-1}_{21} G_1 + L^{-1}_{22} G_2 &= \widetilde{l}^{-1}_{12} \odot G_1 - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{22}\widetilde{l}^{-1}_{12}^\top G_1 + 
+            \widetilde{l}^{-1}_{22} \odot G_2 - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\widetilde{l}^{-1}_{22}\widetilde{l}^{-1}_{22}^\top G_2\\
+            & = \left(\widetilde{l}^{-1}_{12} \odot G_1 +\widetilde{l}^{-1}_{22} \odot G_2 \right) - \frac{1}{g^2+\mathbf{1}^\top \widetilde{l}^{-1}_{22}}\left(\widetilde{l}^{-1}_{12}^\top G_1 + \widetilde{l}^{-1}_{22}^\top G_2\right)\widetilde{l}^{-1}_{22}.
+    \end{aligned}
+\end{equation}
+The computation of $NT_2$ can be seen as a multiplication between a $n\times m$ matrix $[M(L_{11}^{-1})^{\top} M(L_{21}^{-1})^{\top}]^{\top}$ and a vector $\gamma := \left(I_k-2t M L^{-1}_{11} M^\top\right)^{-1}M\left(L^{-1}_{11} G_1 + L^{-1}_{12} G_2\right)$. We note that $\left(L^{-1}_{11} G_1 + L^{-1}_{12} G_2\right)$ is obtained from (\ref{L11-1G1+L12-1G2}). As long as we have the matrix $I_k-2t M L^{-1}_{11} M^\top$, we can use Cholesky decomposition to factorize it and then solve the linear equation to obtain $\gamma$:
+\begin{equation}
+    \left(I_k-2t M L^{-1}_{11} M^\top\right)\gamma = M\left(L^{-1}_{11} G_1 + L^{-1}_{12} G_2\right).
+\end{equation}
+The core step of computing $I_k-2t M L^{-1}_{11} M^\top$ is the multiplication $M L^{-1}_{11}$
+\begin{equation}
+    \begin{aligned}
+             M L^{-1}_{11} &= M\cdot \operatorname{diag}^{*}\left(\widetilde{l}_{11}^{-1}\right)-M\cdot\frac{1}{g^{2}+1^{\top} \widetilde{l}_{22}^{-1}} \widetilde{l}_{12}^{-1} \widetilde{l}_{12}^{-1 \top}   \\
+    &= M\odot \widetilde{l}_{11}^{-1} - \frac{1}{g^{2}+1^{\top}} \left(M\widetilde{l}_{12}^{-1}\right)\widetilde{l}_{12}^{-1 \top}.
+    \end{aligned}
+\end{equation}
+(?? The definition of $\odot$ between a matrix and a vector needs to be specified.)Thus,
+\begin{equation}
+ I_k-2t M L^{-1}_{11} M^\top = I_k-2t \left(M L^{-1}_{11}\right) M^\top.  \end{equation}
+ $L_{21}^{-1}$ can be computed in the similar way, so we have
+ \begin{equation}
+      NT_2 = 2t\cdot \begin{bmatrix} L^{-1}_{11}M^\top\\L^{-1}_{21}M^\top  \end{bmatrix} \gamma.
+ \end{equation}
+ 
+\section{Numerical results}
+\subsection{Time cost}
+\subsubsection{Operations linear in $n$ for solving Newton direction}
+\subsubsection{Comparison with Ipopt package}
+\subsection{Accuracy}
+\subsubsection{MSE error}
+\subsubsection{Sparsity identification}
+\subsection{Practical convergence issue of ADMM}
+
+\section{Conclusion and future work} In summary, this paper propose a method to recover sparse DFT when the signal in noisy and probably the signal is partially missing. The goal is achieved by construct a mapping between a complex least square problem and LASSO. Accounting for the convergence issue in ADMM, we instead use interior point method to solve LASSO. Beyond that, the storage of design matrix is much less than LASSO because we leverage the orthogonality structure of DFT. Also the orthogonality also allows us to do operations linear in $n$ when we find the Newton direction. These two factors make our method scalable.
+
+Although we save tons of storage without saving the design matrix, the missing values is still too huge to store when the size of the problem is too large. Fortunately, the image of the crystal has periodic missing values, and the rows of $A$ share some similarity when they are around the same location. This possibly allows us to save part of the missing rows and do interpolation to construct the rest.
+\bibliographystyle{siamplain}
+\bibliography{references}
+
+\end{document}

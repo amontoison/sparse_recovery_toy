@@ -1,0 +1,248 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+%% Sets page size and margins
+\usepackage[a4paper,top=2cm,bottom=2cm,left=2cm,right=2cm,marginparwidth=1.75cm]{geometry}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\renewcommand{\algorithmicrequire}{ \textbf{Input:}} %Use Input in the format of Algorithm
+\renewcommand{\algorithmicensure}{ \textbf{Output:}} %UseOutput in the format of Algorithm
+\usepackage{multirow}
+%\usepackage{fdsymbol}
+\usepackage{amsthm}
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{latexsym}
+%\usepackage{fdsymbol} 
+\usepackage{ dsfont }
+\usepackage{color}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{biblatex}
+\addbibresource{references.bib}
+
+\title{Preconditioned Conjugate Gradient}
+\author{Wei Kuang}
+\date{June 29, 2023}
+
+\begin{document}
+
+\maketitle
+\section{A brief review about problem formulation}
+\subsection{Problem formulation}
+$z$ is the signal after punching. We would like to minimize the least square loss meanwhile introducing sparsity on delta pdf $v$:
+\begin{equation}
+    \min_v \|z-IDFT(v)_{[nonmissing]}\|^2 \text{ s.t. } \|v\|_1\leq d
+\end{equation}
+We construct two one to one mappings:
+\begin{equation}
+    \text{IDFT operator} \iff \text{orthogonal matrix }A\text{ and } v\iff \beta
+\end{equation}
+Define
+\begin{equation}
+    M_{\perp} = A_{[nonmissing]}
+\end{equation}
+Thus, the problem can be rewritten in real domain:
+\begin{equation}
+   \min_{\beta} \|z-M_{\perp}\beta\|^2 \text{ s.t. } \|\beta\|_1\leq d    
+\end{equation}
+To make the constraints differential, we can introduce slack variables $c_i$ rewrite the constraint as
+\begin{equation}
+    -c_i\leq \beta_i \leq c_i, \sum_{i=0}^{n-1}c_i \leq d
+\end{equation}
+\subsection{Interior point method}
+If we consider a problem 
+\begin{equation}
+    \min f_0(x) \text{ s.t. } f_i(x)\leq 0
+\end{equation}
+which is equivalent to
+\begin{equation}
+    \min f_0(x) + \sum_{i=1}^m I_{-}(f_i(x))
+\end{equation}
+It can be approached by
+\begin{equation}
+    \min f_0(x) -\frac{1}{t} \sum_{i=1}^m log(-f_i(x))
+\end{equation}
+\section{Computation of gradient and Hessian}
+To optimization problem is as follows
+    \begin{equation}\label{problem}
+\begin{aligned}
+     &\min_{\beta,c} f_0(\beta,c)   \\
+     \text{s.t. } & l_i(\beta, c)\leq 0\text{ for }i=0,\dots,n-1\\
+     &u_i(\beta, c)\leq 0\text{ for }i=0,\dots,n-1\\
+     & g(\beta, c)\leq 0
+\end{aligned}
+\end{equation}
+where
+\begin{equation}\label{func_val}
+    \begin{aligned}
+        f_0(\beta, c) &= \beta^\top M_{\perp}^\top M_{\perp}\beta-2\beta^\top M_{\perp}^\top z \\
+    l_i(\beta, c) &= -\beta_i-c_i = -\beta^\top e_i-c^\top e_i, i = 0,\dots, n-1\\
+    u_i(\beta, c) &= \beta_i - c_i = \beta^\top e_i - c^\top e_i, i = 0, \dots, n-1\\    
+    g(\beta, c) &= \sum_{i=0}^{n-1} c_i - d = c^\top \mathbf{1} - d
+    \end{aligned}
+\end{equation}
+$e_i$ refers to the vector with all zero entries except that the $i-th$ entry is 1. 
+In the interior point method, we define 
+\begin{equation}
+    \phi(\beta, c) = -\sum_{i=0}^{n-1} \log (-l_i(\beta, c)) - \sum_{i=0}^{n-1} \log (-u_i(\beta, c))  -\log (-g(\beta, c)),
+\end{equation}
+and the central path is
+\begin{equation}
+    \psi(\beta,c) = t*f_0(\beta,c)+\phi(\beta,c).
+\end{equation}
+The gradient is
+\begin{equation}\label{gradient}
+\nabla \psi(\beta, c) = \begin{pmatrix}
+    \nabla_{\beta} \psi(\beta, c)\\
+    \nabla_c \psi(\beta, c)
+\end{pmatrix} = \begin{pmatrix}
+    2t M_{\perp}^\top M_{\perp}\beta-2t M_{\perp}^\top z+\frac{1}{l}-\frac{1}{u}\\
+    \frac{1}{l}+\frac{1}{u}-\frac{1}{g}\mathbf{1}
+\end{pmatrix},
+\end{equation}
+where $\frac{1}{l}=(\frac{1}{l_0},\dots,\frac{1}{l_{n-1}})^\top$. The Hessian is
+\begin{equation}\label{Hessian}
+\begin{aligned}
+    \nabla^2\psi(\beta, c) &= \begin{pmatrix}
+        2tM_{\perp}^\top M_{\perp}+diag^*\left(\frac{1}{l^2}+\frac{1}{u^2}\right) &diag^*\left(\frac{1}{l^2}-\frac{1}{u^2}\right)\\
+        diag^*\left(\frac{1}{l^2}-\frac{1}{u^2}\right)&diag^*\left(\frac{1}{l^2}+\frac{1}{u^2}\right)+\frac{1}{g^2}\mathbf{1}\mathbf{1}^\top
+    \end{pmatrix}\\
+    &= \begin{pmatrix}
+        2t\mathbf{I}_n+diag^*\left(\frac{1}{l^2}+\frac{1}{u^2}\right) &diag^*\left(\frac{1}{l^2}-\frac{1}{u^2}\right)\\
+        diag^*\left(\frac{1}{l^2}-\frac{1}{u^2}\right)&diag^*\left(\frac{1}{l^2}+\frac{1}{u^2}\right)
+    \end{pmatrix} + \begin{pmatrix}
+        0\\
+        \frac{1}{g}\mathbf{1}
+    \end{pmatrix}\begin{pmatrix}
+        0 &  \frac{1}{g}\mathbf{1}^\top
+    \end{pmatrix} - \begin{pmatrix}
+        \sqrt{2t}M^\top\\
+        0
+    \end{pmatrix}\begin{pmatrix}
+        \sqrt{2t}M & 0
+    \end{pmatrix}\\
+ & =: L + \begin{pmatrix}
+        0\\
+        \frac{1}{g}\mathbf{1}
+    \end{pmatrix}\begin{pmatrix}
+        0 &  \frac{1}{g}\mathbf{1}^\top
+    \end{pmatrix} - \begin{pmatrix}
+        \sqrt{2t}M^\top\\
+        0
+    \end{pmatrix}\begin{pmatrix}
+        \sqrt{2t}M & 0
+    \end{pmatrix}
+    \end{aligned}
+\end{equation}
+
+\section{Preconditioned Conjugate Gradient Algorithm}
+\subsection{$L$ is positive definite}
+It is obvious that $L$ is positive semidefinite. What we need to show is $|L|>0$. We simplify the notation in $L$.
+\begin{equation}\label{L}
+    L = \begin{pmatrix}
+        A & B\\
+        C & D
+    \end{pmatrix} = \begin{pmatrix}
+        diag^*(a) & diag^*(b)\\
+        diag^*(b) & diag^*(d)
+    \end{pmatrix}
+\end{equation}
+The determinant of block matrix can be computed as
+\begin{equation}
+    |L| = |D||A-BD^{-1}C|.
+\end{equation}
+Here we assume $\frac{1}{l_i}>0$ and $\frac{1}{u_i}>0$. Thus, $|D|>0$. Furthermore,
+\begin{equation}
+    A - BD^{-1}C = diag^*\left(a-b^2/d\right).
+\end{equation}
+We do some calculation
+\begin{equation}
+\begin{aligned}
+     a-b^2/d &= 2t+\frac{1}{l^2}+\frac{1}{u^2} - \frac{\left(\frac{1}{l^2}-\frac{1}{u^2}\right)^2}{\frac{1}{l^2}+\frac{1}{u^2}}\\
+     &= \frac{2tl^2u^2+l^2+u^2}{l^2u^2} - \frac{(l^2-u^2)^2}{(l^2+u^2)l^2u^2}\\
+     & = \frac{2tl^2u^2(l^2+u^2)+(l^2+u^2)^2-(l^2-u^2)^2}{l^2u^2(l^2+u^2)}\\
+     & = \frac{2tl^2u^2(l^2+u^2)+4l^2u^2}{l^2u^2(l^2+u^2)}\\
+     & = 2t+\frac{4}{l^2+u^2}
+\end{aligned}
+\end{equation}
+Thus, $|A-BD^{-1}C|>0$.
+
+\subsection{Algorithm}
+\begin{algorithm}[H]
+\caption{Preconditioned Conjugate Gradient}
+\label{PreconditionedCG}
+\begin{algorithmic}
+\REQUIRE ~~\\
+initial point $x_0$, Hessian matrix $\nabla^2\psi$, gradient $\nabla \psi$, preconditioning matrix $L$
+\STATE $r_0 = \nabla^2\psi x_0+\nabla \psi$
+\STATE $y_0 = L^{-1}r_0$
+\STATE $p_0 = -y_0$
+\STATE $k = 0$
+\WHILE{$r_k\neq 0$}
+\STATE $\alpha_k = \frac{r_k^\top y_k}{p_k^\top \nabla^2\psi p_k}$
+\STATE $x_{k+1} = x_k + \alpha_k p_k$
+\STATE $r_{k+1} = r_k + \alpha_k \nabla^2\psi p_k$
+\STATE $y_{k+1} = L^{-1}r_{k+1}$
+\STATE $\beta_{k+1} = \frac{r_{k+1}^\top y_{k+1}}{r_k^\top y_k}$
+\STATE $p_{k+1} = -y_{k+1}+\beta_{k+1}p_k$
+\STATE $k = k+1$
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+\section{Computation details}
+\subsection{$L^{-1}r$}
+If we denotes the blocks of $L^{-1}$ as
+\begin{equation}
+    L^{-1} := \begin{pmatrix}
+        diag^*(l_{11}^{-1}) & diag^*(l_{12}^{-1})\\
+        diag^*(l_{21}^{-1}) & diag^*(l_{22}^{-1})
+    \end{pmatrix}
+\end{equation}
+where
+\begin{equation}
+    \begin{aligned}
+        l_{22}^{-1}&= (d-b^2/a)^{-1}\\
+        l_{12}^{-1}&= -\frac{b}{a}l_{22}^{-1} = l_{21}^{-1}\\
+        l_{11}^{-1}&= \frac{1}{a} + \frac{b^2}{a^2}l_{22}^{-1}
+    \end{aligned}
+\end{equation}
+Thus,
+\begin{equation}
+    L^{-1}r = L^{-1}\begin{pmatrix}
+        r_{\beta}\\
+        r_c
+    \end{pmatrix} = \begin{pmatrix}
+        l_{11}^{-1}\odot r_{\beta}+l_{12}^{-1}\odot r_{c}\\
+        l_{21}^{-1}\odot r_{\beta}+l_{22}^{-1}\odot r_{c}
+    \end{pmatrix}
+\end{equation}
+\subsection{$\nabla^2\psi p_k$}
+The computation of $\nabla^2\psi p_k$ involves two operations: $M_{\perp}^\top z$ and $M_{\perp}x$. The orthogonality of $A$ also suggests that there exists a unique vector $u\in \mathcal{R}^{n}$ such that
+\begin{equation}\label{u}
+    M_{\perp}u = z, Mu = 0.
+\end{equation}
+Surprisingly, $u$ is nothing but $M_{\perp}^{\top}z$. This can be seen from
+\begin{equation}
+    u = \mathbf{I_n}u = M_{\perp}^{\top} M_{\perp}u +  M^{\top}Mu = M_{\perp}^{\top}z + M^{\top}0 = M_{\perp}^{\top}z.
+\end{equation}
+Define $\widehat{z}$ as a vector where the missing values in $\widetilde{z}$ are replaced by 0, (\ref{u}) can be written as $Au = \widehat{z}$. Moreover, the inverse mapping of $f$ can construct $v$ which satisfying the mapping $Au = IDFT(v)$ for each $u$. Hence, $v$ can be solved via Fourier transform on $\widehat{z}$
+\begin{equation}
+    v = DFT(Au) = DFT(\widehat{z}).
+\end{equation}
+We have constructed mappings between IDFT operator and orthogonal matrix $A$, and between DFT $v$ and real-valued vector $x$. Thus,
+\begin{equation}
+    M_{\perp}x = \left(Ax\right)_{[M_{\perp}]} = IDFT\left(v\right)_{[M_{\perp}]}
+\end{equation}
+%References
+%\printbibliography
+%\appendix
+
+
+
+\end{document}

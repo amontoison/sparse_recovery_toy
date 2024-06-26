@@ -1,0 +1,113 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+%% Sets page size and margins
+\usepackage[a4paper,top=2cm,bottom=2cm,left=2cm,right=2cm,marginparwidth=1.75cm]{geometry}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\renewcommand{\algorithmicrequire}{ \textbf{Input:}} %Use Input in the format of Algorithm
+\renewcommand{\algorithmicensure}{ \textbf{Output:}} %UseOutput in the format of Algorithm
+\usepackage{multirow}
+\usepackage{fdsymbol}
+\usepackage{amsthm}
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{ dsfont }
+\usepackage{color}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{biblatex}
+\addbibresource{references.bib}
+
+\title{Finite-time Active Set Identification}
+%\author{Lin Gui, Wei Kuang, Haoyang Wu}
+\date{December 2, 2022}
+
+\begin{document}
+
+\maketitle
+The LASSO problem is
+\begin{equation}
+    \min_{\beta}\frac{1}{2}\|Y-M\beta\|^2 +\lambda\|\beta\|_1.
+\end{equation}
+It is equivalent to 
+\begin{equation}
+    \min_{\beta, \alpha}\frac{1}{2}\|Y-M\beta\|^2 +\lambda\|\alpha\|_1\text{ s.t. }\beta-\alpha=0.
+\end{equation}
+The augmented Lagrangian (scaled version) is
+\begin{equation}
+    L_(\beta, \alpha, w) = \frac{1}{2}\|Y-M\beta\|^2 +\lambda\|\alpha\|_1 + \frac{\rho}{2}\|\beta-\alpha+w\|^2 - \frac{\rho}{2}\|w\|^2.
+\end{equation}
+The scaled ADMM is as follows.
+\begin{equation}
+\begin{aligned}
+    \beta^{(k)} &= \arg\min_{\beta}L_(\beta, \alpha^{(k-1)}, w^{(k-1)})\\
+    &= \arg\min_{\beta} \frac{1}{2}\|Y-M\beta\|^2+ \frac{\rho}{2}\|\beta-\alpha^{(k-1)}+w^{(k-1)}\|^2\\
+    &= (M^TM+\rho \mathbf{I})^{-1}\left(M^Ty - \rho(\alpha^{(k-1)}-w^{(k-1)})\right)\\
+    \alpha^{(k)} &= \arg\min_{\alpha}L_(\beta^{(k)}, \alpha, w^{(k-1)})\\
+    &=\arg\min_{\alpha}\lambda\|\alpha\|_1 + \frac{\rho}{2}\|\beta^{(k)}-\alpha+w^{(k-1)}\|^2\\
+    & = S_{\lambda/\rho}(\beta^{(k)}+w^{(k-1)})\\
+    w^{(k)} &= w^{(k-1)}+\beta^{(k)}-\alpha^{(k)}
+    \end{aligned}    
+\end{equation}
+where $S_{\lambda/\rho}(\cdot)$ is the soft-thresholding operator
+\begin{equation}
+S_{\lambda/\rho}(x) = \left\{\begin{array}{l}
+x - \lambda/\rho, \quad x>\lambda/\rho\\
+0,\quad -\lambda/\rho\leq x \leq \lambda/\rho\\
+x + \lambda/\rho,\quad x<\lambda/\rho
+\end{array}\right.    
+\end{equation}
+The update of $(\alpha^{(k)}, w^{(k)})$ can be written jointly in the form of operator:
+\begin{equation}
+    (\alpha^{(n+1)}, w^{(n+1)}) = T_{\rho}(\alpha^{(n)}, w^{(n)}),
+\end{equation}
+where
+\begin{equation}
+    \begin{aligned}
+        G_{\rho} = \left(\mathbf{I}+\frac{1}{\rho}M^TM\right)^{-1}, A_{\rho} = [G_{\rho}, Id-G_{\rho}]\\
+        b_{\rho} = \frac{1}{\rho}\left(I+\frac{1}{\rho}M^TM\right)^{-1}M^Ty,\quad \widetilde{A}_{\rho} = A_{\rho}(\cdot)+b_{\rho}\\
+        T_{\rho} = \left(S_{\lambda/\rho}\circ\widetilde{A}_{\rho}, (Id - S_{\lambda/\rho})\circ\widetilde{A}_{\rho}\right)
+    \end{aligned}
+\end{equation}
+By Cor 2.2. in \cite{dohmatob2016local}, we know $T_{\rho}$ is $\|A_{\rho}\|$ Lipschitz, i.e.
+\begin{equation}
+    \left\|T_\rho\left(x_1\right)-T_\rho\left(x_2\right)\right\| \leq\left\|A_\rho\right\|\left\|x_1-x_2\right\|.
+\end{equation}
+Let's bound the eigenvalues of $\|A_{\rho}\|$. First, our design matrix $X$ has orthogonal rows, so we can get
+\begin{equation}
+    \lambda_{min}(M^TM)\geq 0,  \lambda_{max}(M^TM)\leq 1,
+\end{equation}
+Furthermore,
+\begin{equation}
+    \frac{1}{1+1/\rho}\leq\lambda\left(\left(\mathbf{I}+\frac{1}{\rho}M^TM\right)^{-1}\right)\leq 1.
+\end{equation}
+Thus, $\|A_{\rho}\|\leq 1$. \textcolor{red}{Note that we are not able to show that }$\color{red}\|A_{\rho}\|< 1.$ \textcolor{red}{Thus, we cannot get a contraction. The paper talks about local convergence when } $\color{red}\|A_{\rho}\|= 1$\textcolor{red}{ under some conditions.}
+
+Next, let's summarize the attractivity of support in Thm 1 in \cite{dohmatob2016local}. Denote $x = (\alpha, w)\in \mathbb{R}^n\times \mathbb{R}$, then define $supp_{\alpha}(x) = \{1\leq j \leq d| \alpha_j\neq 0\}$. $\mathcal{A}_{\alpha}(x)=\{v\in\mathbb{R}^{n+1}|supp_{\alpha}(v)= supp_{\alpha}(x)\}$ is the collection of vector $v$ whose first $n$ entries have the same support as $\alpha$ in $x$. Define $\widetilde{X} = (\widetilde{X}_1,\dots,\widetilde{X}_n)$, where $\widetilde{X}_j = \widetilde{A}_{\rho}(x)_j$. Denote $\kappa = \lambda/\rho$ and define $\epsilon(x)=\min_{1\leq j \leq n}\left|\|\widetilde{X}_j\|-\kappa\right|$. Thm 1 tells us
+\begin{itemize}
+    \item For all $x \in \mathbb{R}^{n+1}$, we have
+    $$T\left(\overline{\mathbb{B}}_{2 q}(x, \epsilon(x) /\|A\|)\right) \subseteq \overline{\mathbb{B}}_{2 q}(T(x), \epsilon(x)) \cap \mathcal{A}_{\alpha}(T(x)).$$
+    In particular, if $x$ is a fixed-point of $T$, then
+    $$T\left(\overline{\mathbb{B}}_{2 q}\left(x^*, \epsilon\left(x^*\right) /\|A\|\right)\right) \subseteq \overline{\mathbb{B}}_{2 q}\left(x^*, \epsilon\left(x^*\right)\right) \cap \mathcal{A}_{\alpha}\left(x^*\right) .$$
+    \item It's easy to see as long as the sequence $x^{(n)}$ once enters $\overline{\mathbb{B}}_{2 q}\left(x^*, \epsilon\left(x^*\right) /\|A\|\right)$, the active set won't come out of $\mathcal{A}_{\alpha}\left(x^*\right)$.
+    
+\end{itemize}
+
+
+
+
+
+
+
+%References
+\printbibliography
+
+%\appendix
+
+
+
+\end{document}
