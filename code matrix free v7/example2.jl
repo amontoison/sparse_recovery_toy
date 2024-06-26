@@ -39,7 +39,7 @@ index_missing, z_zero = punching(DFTdim, DFTsize, centers, radius, y)
 
 M_perptz = M_perp_tz(DFTdim, DFTsize, z_zero); # M_perptz
 
-lambda = 100;
+lambda = 10;
 
 alpha_LS = 0.1;
 gamma_LS = 0.8;
@@ -62,6 +62,12 @@ beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM(paramf, rho)
 
 norm(beta_IPOPT.-beta_ADMM)
 
+
+#### comparison with orginal data
+w_est = beta_to_DFT(DFTdim, DFTsize, beta_ADMM)
+norm(w.-w_est)
+#############
+
 plot(subgrad_IPOPT, time_IPOPT, seriestype=:scatter, title = "IP: 1d (500) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
 plot(log.(subgrad_IPOPT), time_IPOPT, seriestype=:scatter, title = "IP: 1d (500) time vs log(subgrad)", xlab = "log(subgrad)", ylab = "time", legend = false)
 plot(log.(subgrad_IPOPT), title = "IP: 1d (500) log(subgrad)", xlabel = "iter", ylabel = "log(subgrad)", legend = false)
@@ -80,7 +86,7 @@ x = (cos.(2*pi*2/Nt*t)+ 2*sin.(2*pi*2/Nt*t))*(cos.(2*pi*3/Ns*s) + 2*sin.(2*pi*3/
 Random.seed!(1)
 y = x + randn(Nt,Ns)#noisy signal
 
-w = round.(fft(x)./sqrt(Nt), digits = 4);#true DFT
+w = round.(fft(x)./sqrt(Nt*Ns), digits = 4);#true DFT
 DFTsize = size(x); # problem dim
 DFTdim = length(DFTsize); # problem size
 beta_true = DFT_to_beta(DFTdim, DFTsize, w);
@@ -111,6 +117,11 @@ paramf = (DFTdim, DFTsize, M_perptz, lambda, index_missing_Cartesian)
 beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM(paramf, rho)
 
 norm(beta_IPOPT.-beta_ADMM)
+
+#### comparison with orginal data
+w_est = beta_to_DFT(DFTdim, DFTsize, beta_ADMM)
+norm(w.-w_est)
+#############
 
 plot(subgrad_IPOPT, time_IPOPT, seriestype=:scatter, title = "IP: 2d (20*24) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
 plot(log.(subgrad_IPOPT), time_IPOPT, seriestype=:scatter, title = "IP: 2d (20*24) time vs log(subgrad)", xlab = "log(subgrad)", ylab = "time", legend = false)
@@ -133,7 +144,7 @@ x = [(cos(2*pi*1/N1*i)+ 2*sin(2*pi*1/N1*i))*(cos(2*pi*2/N2*j) + 2*sin(2*pi*2/N2*
 Random.seed!(2)
 y = x + rand(N1, N2, N3); # noisy signal
 
-w = round.(fft(x)./sqrt(Nt), digits = 4);#true DFT
+w = round.(fft(x)./sqrt(N1*N2*N3), digits = 4);#true DFT
 DFTsize = size(x); # problem dim
 DFTdim = length(DFTsize); # problem size
 beta_true = DFT_to_beta(DFTdim, DFTsize, w);
@@ -164,6 +175,12 @@ paramf = (DFTdim, DFTsize, M_perptz, lambda, index_missing_Cartesian)
 beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM(paramf, rho)
 
 norm(beta_IPOPT.-beta_ADMM)
+
+
+#### comparison with orginal data
+w_est = beta_to_DFT(DFTdim, DFTsize, beta_ADMM)
+norm(w.-w_est)
+#############
 
 plot(subgrad_IPOPT, time_IPOPT, seriestype=:scatter, title = "IP: 3d (6*8*10) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
 plot(log.(subgrad_IPOPT), time_IPOPT, seriestype=:scatter, title = "IP: 3d (6*8*10) time vs log(subgrad)", xlab = "log(subgrad)", ylab = "time", legend = false)
