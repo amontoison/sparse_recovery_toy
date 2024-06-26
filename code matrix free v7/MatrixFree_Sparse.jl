@@ -72,7 +72,28 @@ end
 
 DFTsize = size(punched_pmn); # problem dim
 DFTdim = length(DFTsize); # problem size
-beta_true = DFT_to_beta(DFTdim, DFTsize, w);
+M_perptz = M_perp_tz(DFTdim, DFTsize, punched_pmn);
+Nt = prod(DFTsize)
+
+lambda = 1;
+
+alpha_LS = 0.1;
+gamma_LS = 0.8;
+eps_NT = 1e-6;
+eps_barrier = 1e-6;
+mu_barrier = 10;
+
+paramset = paramunified(DFTdim, DFTsize, M_perptz, lambda, index_missing_2D, alpha_LS, gamma_LS, eps_NT, mu_barrier, eps_barrier)
+
+
+t_init = 1;
+beta_init = ones(Nt)./2;
+c_init = ones(Nt);
+
+beta_IPOPT, c_IPOPT, subgrad_IPOPT, time_IPOPT = barrier_mtd(beta_init, c_init, t_init, paramset)
+
+
+# beta_true = DFT_to_beta(DFTdim, DFTsize, w);
 # sum(abs.(beta_true))
 
 # Nt = 500;
