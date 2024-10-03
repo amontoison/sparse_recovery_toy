@@ -10,6 +10,9 @@ include("Mtgeneration.jl")
 include("punching.jl")
 include("Admm_MatrixFree.jl")
 
+include("Admm_alexis.jl")
+version_alexis = true
+graphics = false
 
 function paramunified(DFTdim, DFTsize, M_perptz, lambda, index_missing, alpha_LS, gamma_LS, eps_NT, mu_barrier, eps_barrier)
     paramf = (DFTdim, DFTsize, M_perptz, lambda, index_missing)
@@ -58,7 +61,16 @@ beta_IPOPT, c_IPOPT, subgrad_IPOPT, time_IPOPT = barrier_mtd(beta_init, c_init, 
 
 rho = 1
 paramf = (DFTdim, DFTsize, M_perptz, lambda, index_missing)
-beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM(paramf, rho)
+
+if version_alexis
+    beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM_alexis(paramf, rho)
+    t = @elapsed cgADMM_alexis(paramf, rho)
+    println("The first example requires $t seconds.")
+else
+    beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM(paramf, rho)
+    t = @elapsed cgADMM(paramf, rho)
+    println("The first example requires $t seconds.")
+end
 
 norm(beta_IPOPT.-beta_ADMM)
 
@@ -114,7 +126,16 @@ beta_IPOPT, c_IPOPT, subgrad_IPOPT, time_IPOPT = barrier_mtd(beta_init, c_init, 
 
 rho = 1
 paramf = (DFTdim, DFTsize, M_perptz, lambda, index_missing_Cartesian)
-beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM(paramf, rho)
+
+if version_alexis
+    beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM_alexis(paramf, rho)
+    t = @elapsed cgADMM_alexis(paramf, rho)
+    println("The second example requires $t seconds.")
+else
+    beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM(paramf, rho)
+    t = @elapsed cgADMM(paramf, rho)
+    println("The second example requires $t seconds.")
+end
 
 norm(beta_IPOPT.-beta_ADMM)
 
@@ -172,7 +193,16 @@ beta_IPOPT, c_IPOPT, subgrad_IPOPT, time_IPOPT = barrier_mtd(beta_init, c_init, 
 
 rho = 1
 paramf = (DFTdim, DFTsize, M_perptz, lambda, index_missing_Cartesian)
-beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM(paramf, rho)
+
+if version_alexis
+    beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM_alexis(paramf, rho)
+    t = @elapsed cgADMM_alexis(paramf, rho)
+    println("The third example requires $t seconds.")
+else
+    beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM(paramf, rho)
+    t = @elapsed cgADMM(paramf, rho)
+    println("The third example requires $t seconds.")
+end
 
 norm(beta_IPOPT.-beta_ADMM)
 
@@ -182,10 +212,12 @@ w_est = beta_to_DFT(DFTdim, DFTsize, beta_ADMM)
 norm(w.-w_est)
 #############
 
-plot(subgrad_IPOPT, time_IPOPT, seriestype=:scatter, title = "IP: 3d (6*8*10) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
-plot(log.(subgrad_IPOPT), time_IPOPT, seriestype=:scatter, title = "IP: 3d (6*8*10) time vs log(subgrad)", xlab = "log(subgrad)", ylab = "time", legend = false)
-plot(log.(subgrad_IPOPT), title = "IP: 3d (6*8*10) log(subgrad)", xlabel = "iter", ylabel = "log(subgrad)", legend = false)
+if graphics
+    plot(subgrad_IPOPT, time_IPOPT, seriestype=:scatter, title = "IP: 3d (6*8*10) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
+    plot(log.(subgrad_IPOPT), time_IPOPT, seriestype=:scatter, title = "IP: 3d (6*8*10) time vs log(subgrad)", xlab = "log(subgrad)", ylab = "time", legend = false)
+    plot(log.(subgrad_IPOPT), title = "IP: 3d (6*8*10) log(subgrad)", xlabel = "iter", ylabel = "log(subgrad)", legend = false)
 
-plot(subgrad_ADMM, time_ADMM, seriestype=:scatter, title = "ADMM: 3d (6*8*10) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
-plot(log.(subgrad_ADMM), time_ADMM, seriestype=:scatter, title = "ADMM: 3d (6*8*10) time vs log(subgrad)", xlab = "log(subgrad)", ylab = "time", legend = false)
-plot(log.(subgrad_ADMM), title = "ADMM: 3d (6*8*10) log(subgrad)", xlabel = "iter", ylabel = "log(subgrad)", legend = false)
+    plot(subgrad_ADMM, time_ADMM, seriestype=:scatter, title = "ADMM: 3d (6*8*10) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
+    plot(log.(subgrad_ADMM), time_ADMM, seriestype=:scatter, title = "ADMM: 3d (6*8*10) time vs log(subgrad)", xlab = "log(subgrad)", ylab = "time", legend = false)
+    plot(log.(subgrad_ADMM), title = "ADMM: 3d (6*8*10) log(subgrad)", xlabel = "iter", ylabel = "log(subgrad)", legend = false)
+end
