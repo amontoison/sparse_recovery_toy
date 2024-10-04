@@ -10,6 +10,7 @@ function NT_mtd(t, beta_init, c_init, eps_NT, paramLS, paramf)
     # workspace for Krylvo.cg!
     n = length(beta)
     workspace = Krylov.CgSolver(2*n, 2*n, Vector{Float64})
+    rhs = Vector{Float64}(undef, 2*n)
 
     while(true)
         count = count + 1;
@@ -18,9 +19,13 @@ function NT_mtd(t, beta_init, c_init, eps_NT, paramLS, paramf)
         end
 
         gradb, gradc = fgrad2(t, beta, c, paramf);
-        t_start = time()
+        rhs[1:n] .= -1.0 .* gradb
+        rhs[(n+1):(2*n)] .= -1.0 .* gradc
+
         # delta_beta, delta_c = CG(workspace, t, beta, c, gradb, gradc, paramf);
-        delta_beta, delta_c = CG_alexis(workspace, t, beta, c, gradb, gradc, paramf);
+
+        t_start = time()
+        delta_beta, delta_c = CG_alexis(workspace, t, beta, c, rhs, paramf);
         t_end = time()
         elapsed_time = t_end - t_start
         println("It requires $(elapsed_time) seconds to solve system with CG at iteration $count.")

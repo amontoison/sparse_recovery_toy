@@ -118,7 +118,27 @@ function L_inv_r_alexis(y, n, l11_inv, l12_inv, l22_inv, r)
     return y
 end
 
-function CG_alexis(workspace, t, beta, c, gradb, gradc, paramf, CG_esp = 10e-6)
+function Hessian_vec_alexis(y, n, t, l, u, dim, size, idx_missing, p)
+    p_beta = view(p, 1:n)
+    p_c = view(p, (n+1):(2*n))
+
+    y_beta = view(y, 1:n)
+    y_c = view(y, (n+1):(2*n))
+
+    l11 = (inv.(l.^2)) .+ (inv.(u.^2));
+    l12 = (inv.(l.^2)) .- (inv.(u.^2));
+
+    H11_pbeta = (l11 .* p_beta) .+ (M_perpt_M_perp_vec(dim, size, p_beta, idx_missing) .* t);
+    H12_pc = l12 .* p_c;
+    H21_pbeta = l12.* p_beta;
+    H22_pc = l11 .* p_c;
+
+    y_beta .= H11_pbeta .+ H12_pc
+    y_c .= H21_pbeta .+ H22_pc
+    return y
+end
+
+function CG_alexis(workspace, t, beta, c, rhs, paramf, CG_esp = 10e-6)
     global nkrylov_ipm += 1
 
     dim = paramf[1];
@@ -138,11 +158,11 @@ function CG_alexis(workspace, t, beta, c, gradb, gradc, paramf, CG_esp = 10e-6)
     l12_inv = (inv.(l11)) .* l12.*l22_inv .* (-1);
     l11_inv = (inv.(l11)) .+ ((inv.(l11)).^2) .* (l12.^2) .* l22_inv;
 
-    A = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> (y .= Hessian_vec(t, l, u, dim, size, idx_missing, v)))
-    b = [-gradb; -gradc];
+    # A = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> (y .= Hessian_vec_alexis(t, l, u, dim, size, idx_missing, v)))
+    A = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> Hessian_vec_alexis(y, n, t, l, u, dim, size, idx_missing, v))
     # P = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> (y .= L_inv_r(t, l, u, v)))
     P = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> L_inv_r_alexis(y, n, l11_inv, l12_inv, l22_inv, v))
-    Krylov.cg!(workspace, A, b, M=P, atol=CG_esp, rtol=0.0, verbose=0)
+    Krylov.cg!(workspace, A, rhs, M=P, atol=CG_esp, rtol=0.0, verbose=0)
 
     x = Krylov.solution(workspace)
     return x[1:n], x[(n+1):(2*n)]#, iter
