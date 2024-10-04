@@ -3,6 +3,8 @@ using FFTW;
 using SparseArrays;
 using Random, Distributions;
 using Plots;
+using Krylov;
+using LinearOperators;
 
 include("IPmtd.jl")
 include("Mperptz.jl")
@@ -13,6 +15,10 @@ include("Admm_MatrixFree.jl")
 include("Admm_alexis.jl")
 version_alexis = true
 graphics = false
+problem_1d = true
+problem_2d = false
+problem_3d = false
+global nkrylov_ipm = 0
 
 function paramunified(DFTdim, DFTsize, M_perptz, lambda, index_missing, alpha_LS, gamma_LS, eps_NT, mu_barrier, eps_barrier)
     paramf = (DFTdim, DFTsize, M_perptz, lambda, index_missing)
@@ -22,7 +28,9 @@ function paramunified(DFTdim, DFTsize, M_perptz, lambda, index_missing, alpha_LS
     return paramset
 end
 
-Nt = 500;
+if problem_1d
+# Nt = 500;
+Nt = 10^5;
 t = collect(0:(Nt-1));
 x1 = 2*cos.(2*pi*t*6/Nt).+ 3*sin.(2*pi*t*6/Nt);
 x2 = 4*cos.(2*pi*t*10/Nt).+ 5*sin.(2*pi*t*10/Nt);
@@ -58,6 +66,7 @@ beta_init = ones(Nt)./2;
 c_init = ones(Nt);
 
 beta_IPOPT, c_IPOPT, subgrad_IPOPT, time_IPOPT = barrier_mtd(beta_init, c_init, t_init, paramset)
+println("Number of calls to CG: $(nkrylov_ipm).")
 
 rho = 1
 paramf = (DFTdim, DFTsize, M_perptz, lambda, index_missing)
@@ -77,7 +86,7 @@ norm(beta_IPOPT.-beta_ADMM)
 
 #### comparison with orginal data
 w_est = beta_to_DFT(DFTdim, DFTsize, beta_ADMM)
-norm(w.-w_est)
+norm(w .- w_est)
 #############
 
 plot(subgrad_IPOPT, time_IPOPT, seriestype=:scatter, title = "IP: 1d (500) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
@@ -87,11 +96,14 @@ plot(log.(subgrad_IPOPT), title = "IP: 1d (500) log(subgrad)", xlabel = "iter", 
 plot(subgrad_ADMM, time_ADMM, seriestype=:scatter, title = "ADMM: 1d (500) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
 plot(log.(subgrad_ADMM), time_ADMM, seriestype=:scatter, title = "ADMM: 1d (500) time vs log(subgrad)", xlab = "log(subgrad)", ylab = "time", legend = false)
 plot(log.(subgrad_ADMM), title = "ADMM: 1d (500) log(subgrad)", xlabel = "iter", ylabel = "log(subgrad)", legend = false)
+end
 
-
+if problem_2d
 ## 2d
-Nt = 20;
-Ns = 24;
+# Nt = 20;
+# Ns = 24;
+Nt = 4;
+Ns = 4;
 t = collect(0:(Nt-1));
 s = collect(0:(Ns-1));
 x = (cos.(2*pi*2/Nt*t)+ 2*sin.(2*pi*2/Nt*t))*(cos.(2*pi*3/Ns*s) + 2*sin.(2*pi*3/Ns*s))';
@@ -151,13 +163,18 @@ plot(log.(subgrad_IPOPT), title = "IP: 2d (20*24) log(subgrad)", xlabel = "iter"
 plot(subgrad_ADMM, time_ADMM, seriestype=:scatter, title = "ADMM: 2d (20*24) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
 plot(log.(subgrad_ADMM), time_ADMM, seriestype=:scatter, title = "ADMM: 2d (20*24) time vs log(subgrad)", xlab = "log(subgrad)", ylab = "time", legend = false)
 plot(log.(subgrad_ADMM), title = "ADMM: 2d (20*24) log(subgrad)", xlabel = "iter", ylabel = "log(subgrad)", legend = false)
+end
 
-
-
+if problem_3d
 ## 3d
-N1 = 6;
-N2 = 8;
-N3 = 10;
+# N1 = 6;
+# N2 = 8;
+# N3 = 10;
+
+N1 = 100;
+N2 = 100;
+N3 = 100;
+
 idx1 = collect(0:(N1-1));
 idx2 = collect(0:(N2-1));
 idx3 = collect(0:(N3-1));
@@ -220,4 +237,5 @@ if graphics
     plot(subgrad_ADMM, time_ADMM, seriestype=:scatter, title = "ADMM: 3d (6*8*10) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
     plot(log.(subgrad_ADMM), time_ADMM, seriestype=:scatter, title = "ADMM: 3d (6*8*10) time vs log(subgrad)", xlab = "log(subgrad)", ylab = "time", legend = false)
     plot(log.(subgrad_ADMM), title = "ADMM: 3d (6*8*10) log(subgrad)", xlabel = "iter", ylabel = "log(subgrad)", legend = false)
+end
 end

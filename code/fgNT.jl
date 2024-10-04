@@ -38,7 +38,6 @@ function fgrad2(t, beta, c, paramf)
     return gradb, gradc
 end
 
-
 function L_inv_r(t, l, u, r)
     n = length(l);
     r_beta = r[1:n];
@@ -55,7 +54,6 @@ function L_inv_r(t, l, u, r)
     return [(l11_inv.*r_beta).+(l12_inv.*r_c); (l12_inv.*r_beta).+(l22_inv.*r_c)]
 end
 
-
 function Hessian_vec(t, l, u, dim, size, idx_missing, p)
     n = length(l);
     p_beta = p[1:n];
@@ -71,7 +69,6 @@ function Hessian_vec(t, l, u, dim, size, idx_missing, p)
 
     return [H11_pbeta.+H12_pc; H21_pbeta.+H22_pc]
 end
-
 
 function CG(t, beta, c, gradb, gradc, paramf, CG_esp = 10e-6)
     dim = paramf[1];
@@ -107,4 +104,46 @@ function CG(t, beta, c, gradb, gradc, paramf, CG_esp = 10e-6)
     end
 
     return x0[1:n], x0[(n+1):(2*n)]#, iter
+end
+
+function L_inv_r_alexis(y, n, l11_inv, l12_inv, l22_inv, r)
+    r_beta = view(r, 1:n)
+    r_c = view(r, (n+1):(2*n))
+
+    y_beta = view(y, 1:n)
+    y_c = view(y, (n+1):(2*n))
+
+    y_beta .= (l11_inv .* r_beta) .+ (l12_inv .* r_c)
+    y_c .= (l12_inv .* r_beta) .+ (l22_inv .* r_c)
+    return y
+end
+
+function CG_alexis(workspace, t, beta, c, gradb, gradc, paramf, CG_esp = 10e-6)
+    global nkrylov_ipm += 1
+
+    dim = paramf[1];
+    size = paramf[2];
+    lambda = paramf[4];
+    idx_missing = paramf[5];
+    #Mt = paramf[6];
+
+    l = -beta .- c;
+    u = beta .- c;
+    n = length(beta);
+
+    l11 = (inv.(l.^2)) .+ (inv.(u.^2)) .+ t;
+    l12 = (inv.(l.^2)) .- (inv.(u.^2));
+    l22 = (inv.(l.^2)) .+ (inv.(u.^2));
+    l22_inv = inv.(l22 .- ((l12.^2) .* (inv.(l11))));
+    l12_inv = (inv.(l11)) .* l12.*l22_inv .* (-1);
+    l11_inv = (inv.(l11)) .+ ((inv.(l11)).^2) .* (l12.^2) .* l22_inv;
+
+    A = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> (y .= Hessian_vec(t, l, u, dim, size, idx_missing, v)))
+    b = [-gradb; -gradc];
+    # P = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> (y .= L_inv_r(t, l, u, v)))
+    P = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> L_inv_r_alexis(y, n, l11_inv, l12_inv, l22_inv, v))
+    Krylov.cg!(workspace, A, b, M=P, atol=CG_esp, rtol=0.0, verbose=0)
+
+    x = Krylov.solution(workspace)
+    return x[1:n], x[(n+1):(2*n)]#, iter
 end

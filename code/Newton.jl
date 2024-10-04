@@ -7,14 +7,24 @@ function NT_mtd(t, beta_init, c_init, eps_NT, paramLS, paramf)
 
     count = 0;
 
+    # workspace for Krylvo.cg!
+    n = length(beta)
+    workspace = Krylov.CgSolver(2*n, 2*n, Vector{Float64})
+
     while(true)
         count = count + 1;
-        if(count>1000)
+        if count > 1000
             println("Newton's method doesn't terminate, t = ", t)
         end
 
         gradb, gradc = fgrad2(t, beta, c, paramf);
-        delta_beta, delta_c = CG(t, beta, c, gradb, gradc, paramf);
+        t_start = time()
+        # delta_beta, delta_c = CG(workspace, t, beta, c, gradb, gradc, paramf);
+        delta_beta, delta_c = CG_alexis(workspace, t, beta, c, gradb, gradc, paramf);
+        t_end = time()
+        elapsed_time = t_end - t_start
+        println("It requires $(elapsed_time) seconds to solve system with CG at iteration $count.")
+
         #delta_beta1, delta_c1 = NTdir(t, beta, c, gradb, gradc, paramf);
         #println("normdeltab:", norm(delta_beta.-delta_beta1))
         #println("normdeltac:", norm(delta_c.-delta_c1))

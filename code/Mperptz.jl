@@ -11,7 +11,7 @@ include("mapping.jl")
 #(we only consider the cases when the sizes are even for all the dimenstions)
 #(size is a tuple, e.g. size = (10, 20, 30))
 
-# @details This fucnction computes M_{\perp}^{\top}z.
+# @details This function computes M_{\perp}^{\top}z.
 
 # @return M_{\perp}^{\top}z A vector with length equal to the product of size
 # @example
