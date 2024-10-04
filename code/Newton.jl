@@ -7,10 +7,15 @@ function NT_mtd(t, beta_init, c_init, eps_NT, paramLS, paramf)
 
     count = 0;
 
-    # workspace for Krylvo.cg!
+    # workspace for Krylov.cg!
     n = length(beta)
-    workspace = Krylov.CgSolver(2*n, 2*n, Vector{Float64})
-    rhs = Vector{Float64}(undef, 2*n)
+    if gpu
+        workspace = Krylov.CgSolver(2*n, 2*n, CuVector{Float64})
+        rhs = CuVector{Float64}(undef, 2*n)
+    else
+        workspace = Krylov.CgSolver(2*n, 2*n, Vector{Float64})
+        rhs = Vector{Float64}(undef, 2*n)
+    end
 
     while(true)
         count = count + 1;
@@ -24,11 +29,16 @@ function NT_mtd(t, beta_init, c_init, eps_NT, paramLS, paramf)
 
         # delta_beta, delta_c = CG(workspace, t, beta, c, gradb, gradc, paramf);
 
+        beta_tmp = gpu ? CuVector(beta) : beta
+        c_tmp = gpu ? CuVector(c) : c
         t_start = time()
-        delta_beta, delta_c = CG_alexis(workspace, t, beta, c, rhs, paramf);
+        delta_beta, delta_c = CG_alexis(workspace, t, beta_tmp, c_tmp, rhs, paramf);
         t_end = time()
         elapsed_time = t_end - t_start
         println("It requires $(elapsed_time) seconds to solve system with CG at iteration $count.")
+
+        delta_beta = Vector{Float64}(delta_beta)
+        delta_c = Vector{Float64}(delta_c)
 
         #delta_beta1, delta_c1 = NTdir(t, beta, c, gradb, gradc, paramf);
         #println("normdeltab:", norm(delta_beta.-delta_beta1))

@@ -128,7 +128,11 @@ function Hessian_vec_alexis(y, n, t, l, u, dim, size, idx_missing, p)
     l11 = (inv.(l.^2)) .+ (inv.(u.^2));
     l12 = (inv.(l.^2)) .- (inv.(u.^2));
 
-    H11_pbeta = (l11 .* p_beta) .+ (M_perpt_M_perp_vec(dim, size, p_beta, idx_missing) .* t);
+    if gpu
+        H11_pbeta = (l11 .* p_beta) .+ (M_perpt_M_perp_vec_gpu(dim, size, p_beta, idx_missing) .* t);
+    else
+        H11_pbeta = (l11 .* p_beta) .+ (M_perpt_M_perp_vec(dim, size, p_beta, idx_missing) .* t);
+    end
     H12_pc = l12 .* p_c;
     H21_pbeta = l12.* p_beta;
     H22_pc = l11 .* p_c;

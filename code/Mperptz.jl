@@ -1,7 +1,10 @@
 using LinearAlgebra;
 using FFTW;
 using Random, Distributions;
+
 include("mapping.jl")
+include("mapping_gpu.jl")
+
 # compute M_{\perp}^{\top}z
 
 # @param z_zero The zero-imputed signal, i.e. replacing all the missing values in the signal with 0.
@@ -23,20 +26,41 @@ include("mapping.jl")
 
 function M_perp_tz(dim, size, z_zero)
     N = prod(size);
-    temp = fft(z_zero)./sqrt(N);
+    temp = fft(z_zero) ./ sqrt(N);
     return DFT_to_beta(dim, size, temp)
 end
 
 function M_perp_beta(dim, size, beta, idx_missing)
     N = prod(size);
     v = beta_to_DFT(dim, size, beta);
-    temp = real.(ifft(v).*sqrt(N));
-    temp[idx_missing].=0;
+    temp = real.(ifft(v) .* sqrt(N));
+    temp[idx_missing] .= 0;
     return temp
 end
 
 function M_perpt_M_perp_vec(dim, size, vec, idx_missing)
     temp = M_perp_beta(dim, size, vec, idx_missing);
     temp = M_perp_tz(dim, size, temp);
+    return temp
+end
+
+# Note: we should use fft! and ifft!
+function M_perp_tz_gpu(dim, size, z_zero)
+    N = prod(size);
+    temp = fft(z_zero) ./ sqrt(N);
+    return DFT_to_beta_gpu(dim, size, temp)
+end
+
+function M_perp_beta_gpu(dim, size, beta, idx_missing)
+    N = prod(size);
+    v = beta_to_DFT_gpu(dim, size, beta);
+    temp = real.(ifft(v) .* sqrt(N));
+    temp[idx_missing] .= 0;
+    return temp
+end
+
+function M_perpt_M_perp_vec_gpu(dim, size, vec, idx_missing)
+    temp = M_perp_beta_gpu(dim, size, vec, idx_missing);
+    temp = M_perp_tz_gpu(dim, size, temp);
     return temp
 end

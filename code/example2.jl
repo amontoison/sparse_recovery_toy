@@ -18,6 +18,7 @@ graphics = false
 problem_1d = true
 problem_2d = false
 problem_3d = false
+global gpu = false
 global nkrylov_ipm = 0
 
 function paramunified(DFTdim, DFTsize, M_perptz, lambda, index_missing, alpha_LS, gamma_LS, eps_NT, mu_barrier, eps_barrier)
