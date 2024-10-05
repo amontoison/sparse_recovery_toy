@@ -17,6 +17,7 @@ function kernel_DFT_to_beta_1d!(beta, v, N)
         idx = i - Int(N / 2) - 1
         beta[i] = sqrt(2) * imag(v[idx + 1])
     end
+    return nothing
 end
 
 function DFT_to_beta_1d_gpu(v::CuArray, size)
@@ -46,6 +47,7 @@ function kernel_beta_to_DFT_1d!(v, beta, N)
         v[i] = (beta[i] + im * beta[Int(N / 2 + 1) + idx]) / sqrt(2)
         v[N - idx + 1] = (beta[i] - im * beta[Int(N / 2 + 1) + idx]) / sqrt(2)
     end
+    return nothing
 end
 
 function beta_to_DFT_1d_gpu(beta, size)

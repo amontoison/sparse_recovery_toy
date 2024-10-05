@@ -24,8 +24,13 @@ function NT_mtd(t, beta_init, c_init, eps_NT, paramLS, paramf)
         end
 
         gradb, gradc = fgrad2(t, beta, c, paramf);
-        rhs[1:n] .= -1.0 .* gradb
-        rhs[(n+1):(2*n)] .= -1.0 .* gradc
+        if gpu
+            rhs[1:n] .= -1.0 .* CuVector{Float64}(gradb)
+            rhs[(n+1):(2*n)] .= -1.0 .* CuVector{Float64}(gradc)
+        else
+            rhs[1:n] .= -1.0 .* gradb
+            rhs[(n+1):(2*n)] .= -1.0 .* gradc
+        end
 
         # delta_beta, delta_c = CG(workspace, t, beta, c, gradb, gradc, paramf);
 
