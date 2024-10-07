@@ -49,7 +49,7 @@ centers = centering(DFTdim, DFTsize, missing_prob)
 radius = 1
 index_missing, z_zero = punching(DFTdim, DFTsize, centers, radius, y)
 
-M_perptz = M_perp_tz(DFTdim, DFTsize, z_zero); # M_perptz
+M_perptz = M_perp_tz_old(DFTdim, DFTsize, z_zero); # M_perptz
 
 lambda = 10;
 
@@ -82,7 +82,7 @@ else
     println("The first example requires $t seconds.")
 end
 
-norm(beta_IPOPT.-beta_ADMM)
+norm(beta_IPOPT .- beta_ADMM)
 
 
 #### comparison with orginal data
@@ -126,7 +126,7 @@ index_missing_Cartesian, z_zero = punching(DFTdim, DFTsize, centers, radius, y)
 
 
 # unify parameters for barrier method
-M_perptz = M_perp_tz(DFTdim, DFTsize, z_zero);
+M_perptz = M_perp_tz_old(DFTdim, DFTsize, z_zero);
 lambda = 5
 
 paramset = paramunified(DFTdim, DFTsize, M_perptz, lambda, index_missing_Cartesian, alpha_LS, gamma_LS, eps_NT, mu_barrier, eps_barrier)
@@ -198,7 +198,7 @@ radius = 1
 index_missing_Cartesian, z_zero = punching(DFTdim, DFTsize, centers, radius, y)
 
 # unify parameters for barrier method
-M_perptz = M_perp_tz(DFTdim, DFTsize, z_zero);
+M_perptz = M_perp_tz_old(DFTdim, DFTsize, z_zero);
 lambda = 5
 
 paramset = paramunified(DFTdim, DFTsize, M_perptz, lambda, index_missing_Cartesian, alpha_LS, gamma_LS, eps_NT, mu_barrier, eps_barrier)

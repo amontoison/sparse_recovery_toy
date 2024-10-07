@@ -24,43 +24,63 @@ include("mapping_gpu.jl")
 # >size1 = 4;
 # >M_perptz = M_perp_tz(z_zero, dim, size1);
 
-function M_perp_tz(dim, size, z_zero)
+function M_perp_tz_old(dim, size, z_zero)
     N = prod(size);
     temp = fft(z_zero) ./ sqrt(N);
     return DFT_to_beta(dim, size, temp)
 end
 
-function M_perp_beta(dim, size, beta, idx_missing)
+function M_perp_beta_old(dim, size, beta, idx_missing)
     N = prod(size);
     v = beta_to_DFT(dim, size, beta);
-    temp = real.(ifft(v) .* sqrt(N));
+    temp = real.(ifft(v)) .* sqrt(N);
     temp[idx_missing] .= 0;
     return temp
 end
 
-function M_perpt_M_perp_vec(dim, size, vec, idx_missing)
-    temp = M_perp_beta(dim, size, vec, idx_missing);
-    temp = M_perp_tz(dim, size, temp);
+function M_perpt_M_perp_vec_old(dim, size, vec, idx_missing)
+    temp = M_perp_beta_old(dim, size, vec, idx_missing);
+    temp = M_perp_tz_old(dim, size, temp);
+    return temp
+end
+
+function M_perp_tz(op_FFT, dim, size, z_zero)
+    N = prod(size);
+    temp = (op_FFT * z_zero) ./ sqrt(N);
+    return DFT_to_beta(dim, size, temp)
+end
+
+function M_perp_beta(op_FFT, dim, size, beta, idx_missing)
+    N = prod(size);
+    v = beta_to_DFT(dim, size, beta);
+    temp = real.(op_FFT \ v) .* sqrt(N);
+    temp[idx_missing] .= 0;
+    return temp
+end
+
+function M_perpt_M_perp_vec(op_FFT, dim, size, vec, idx_missing)
+    temp = M_perp_beta(op_FFT, dim, size, vec, idx_missing);
+    temp = M_perp_tz(op_FFT, dim, size, temp);
     return temp
 end
 
 # Note: we should use fft! and ifft!
-function M_perp_tz_gpu(dim, size, z_zero)
+function M_perp_tz_gpu(op_FFT, dim, size, z_zero)
     N = prod(size);
-    temp = fft(z_zero) ./ sqrt(N);
+    temp = (op_FFT * z_zero) ./ sqrt(N);
     return DFT_to_beta_gpu(dim, size, temp)
 end
 
-function M_perp_beta_gpu(dim, size, beta, idx_missing)
+function M_perp_beta_gpu(op_FFT, dim, size, beta, idx_missing)
     N = prod(size);
     v = beta_to_DFT_gpu(dim, size, beta);
-    temp = real.(ifft(v) .* sqrt(N));
+    temp = real.(op_FFT \ v) .* sqrt(N);
     temp[idx_missing] .= 0;
     return temp
 end
 
-function M_perpt_M_perp_vec_gpu(dim, size, vec, idx_missing)
-    temp = M_perp_beta_gpu(dim, size, vec, idx_missing);
-    temp = M_perp_tz_gpu(dim, size, temp);
+function M_perpt_M_perp_vec_gpu(op_FFT, dim, size, vec, idx_missing)
+    temp = M_perp_beta_gpu(op_FFT, dim, size, vec, idx_missing);
+    temp = M_perp_tz_gpu(op_FFT, dim, size, temp);
     return temp
 end

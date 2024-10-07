@@ -16,6 +16,7 @@ function NT_mtd(t, beta_init, c_init, eps_NT, paramLS, paramf)
         workspace = Krylov.CgSolver(2*n, 2*n, Vector{Float64})
         rhs = Vector{Float64}(undef, 2*n)
     end
+    op_FFT = plan_fft(workspace.x[1:n])
 
     while(true)
         count = count + 1;
@@ -37,7 +38,7 @@ function NT_mtd(t, beta_init, c_init, eps_NT, paramLS, paramf)
         beta_tmp = gpu ? CuVector(beta) : beta
         c_tmp = gpu ? CuVector(c) : c
         t_start = time()
-        delta_beta, delta_c = CG_alexis(workspace, t, beta_tmp, c_tmp, rhs, paramf);
+        delta_beta, delta_c = CG_alexis(workspace, op_FFT, t, beta_tmp, c_tmp, rhs, paramf);
         t_end = time()
         elapsed_time = t_end - t_start
         println("It requires $(elapsed_time) seconds to solve system with CG at iteration $count.")

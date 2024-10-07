@@ -14,7 +14,7 @@ function fval2(t, beta, c, paramf)
     l = (-1).*beta.-c;
     u = beta.-c;
 
-    fval = (t/2)*sum((M_perp_beta(DFTdim, DFTsize, beta, index_missing)).^2) - t*beta'*M_perptz + t*lambda*sum(c)- sum(log.((-1).*l)) - sum(log.((-1).*u));
+    fval = (t/2)*sum((M_perp_beta_old(DFTdim, DFTsize, beta, index_missing)).^2) - t*beta'*M_perptz + t*lambda*sum(c)- sum(log.((-1).*l)) - sum(log.((-1).*u));
     return fval
 end
 
@@ -32,7 +32,7 @@ function fgrad2(t, beta, c, paramf)
     l = (-1).*beta.-c;
     u = beta.-c;
 
-    gradb = t.*(M_perpt_M_perp_vec(DFTdim, DFTsize, beta, index_missing).-Mperptz).+inv.(l).-inv.(u);
+    gradb = t.*(M_perpt_M_perp_vec_old(DFTdim, DFTsize, beta, index_missing).-Mperptz).+inv.(l).-inv.(u);
     gradc = (t*lambda).*ones(n).+inv.(l).+inv.(u);
 
     return gradb, gradc
@@ -118,7 +118,7 @@ function L_inv_r_alexis(y, n, l11_inv, l12_inv, l22_inv, r)
     return y
 end
 
-function Hessian_vec_alexis(y, n, t, l, u, dim, size, idx_missing, p)
+function Hessian_vec_alexis(y, op_FFT, n, t, l, u, dim, size, idx_missing, p)
     p_beta = view(p, 1:n)
     p_c = view(p, (n+1):(2*n))
 
@@ -129,9 +129,9 @@ function Hessian_vec_alexis(y, n, t, l, u, dim, size, idx_missing, p)
     l12 = (inv.(l.^2)) .- (inv.(u.^2));
 
     if gpu
-        H11_pbeta = (l11 .* p_beta) .+ (M_perpt_M_perp_vec_gpu(dim, size, p_beta, idx_missing) .* t);
+        H11_pbeta = (l11 .* p_beta) .+ (M_perpt_M_perp_vec_gpu(op_FFT, dim, size, p_beta, idx_missing) .* t);
     else
-        H11_pbeta = (l11 .* p_beta) .+ (M_perpt_M_perp_vec(dim, size, p_beta, idx_missing) .* t);
+        H11_pbeta = (l11 .* p_beta) .+ (M_perpt_M_perp_vec(op_FFT, dim, size, p_beta, idx_missing) .* t);
     end
     H12_pc = l12 .* p_c;
     H21_pbeta = l12.* p_beta;
@@ -142,7 +142,7 @@ function Hessian_vec_alexis(y, n, t, l, u, dim, size, idx_missing, p)
     return y
 end
 
-function CG_alexis(workspace, t, beta, c, rhs, paramf, CG_esp = 10e-6)
+function CG_alexis(workspace, op_FFT, t, beta, c, rhs, paramf, CG_esp = 10e-6)
     global nkrylov_ipm += 1
 
     dim = paramf[1];
@@ -163,7 +163,7 @@ function CG_alexis(workspace, t, beta, c, rhs, paramf, CG_esp = 10e-6)
     l11_inv = (inv.(l11)) .+ ((inv.(l11)).^2) .* (l12.^2) .* l22_inv;
 
     # A = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> (y .= Hessian_vec_alexis(t, l, u, dim, size, idx_missing, v)))
-    A = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> Hessian_vec_alexis(y, n, t, l, u, dim, size, idx_missing, v))
+    A = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> Hessian_vec_alexis(y, op_FFT, n, t, l, u, dim, size, idx_missing, v))
     # P = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> (y .= L_inv_r(t, l, u, v)))
     P = LinearOperator(Float64, 2*n, 2*n, true, true, (y, v) -> L_inv_r_alexis(y, n, l11_inv, l12_inv, l22_inv, v))
     Krylov.cg!(workspace, A, rhs, M=P, atol=CG_esp, rtol=0.0, verbose=0)
