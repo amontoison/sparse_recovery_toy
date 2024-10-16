@@ -2,6 +2,7 @@ using LinearAlgebra;
 using SparseArrays;
 
 include("Mperptz.jl")
+include("Mperptz_rfft.jl")
 
 function fval2(t, beta, c, paramf)
     DFTdim = paramf[1];
@@ -131,7 +132,8 @@ function Hessian_vec_alexis(y, op_FFT, n, t, l, u, dim, size, idx_missing, p)
     if gpu
         H11_pbeta = (l11 .* p_beta) .+ (M_perpt_M_perp_vec_gpu(op_FFT, dim, size, p_beta, idx_missing) .* t);
     else
-        H11_pbeta = (l11 .* p_beta) .+ (M_perpt_M_perp_vec(op_FFT, dim, size, p_beta, idx_missing) .* t);
+        H11_pbeta = (l11 .* p_beta) .+ (M_perpt_M_perp_vec_old(dim, size, p_beta, idx_missing) .* t);
+        # H11_pbeta = (l11 .* p_beta) .+ (M_perpt_M_perp_vec(op_FFT, dim, size, p_beta, idx_missing) .* t);
     end
     H12_pc = l12 .* p_c;
     H21_pbeta = l12.* p_beta;

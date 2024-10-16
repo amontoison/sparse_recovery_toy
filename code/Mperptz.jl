@@ -27,7 +27,14 @@ include("mapping_gpu.jl")
 function M_perp_tz_old(dim, size, z_zero)
     N = prod(size);
     temp = fft(z_zero) ./ sqrt(N);
-    return DFT_to_beta(dim, size, temp)
+    beta = DFT_to_beta(dim, size, temp)
+    return beta
+end
+
+function M_perp_tz_old2(dim, size, z_zero)
+    N = prod(size);
+    beta = real.(rfft(z_zero))
+    return beta
 end
 
 function M_perp_beta_old(dim, size, beta, idx_missing)
@@ -38,9 +45,23 @@ function M_perp_beta_old(dim, size, beta, idx_missing)
     return temp
 end
 
+function M_perp_beta_old2(dim, size, beta, idx_missing)
+    N = prod(size);
+    M = 2 * (N - 1)
+    temp = irfft(beta, M)
+    temp[idx_missing] .= 0;
+    return temp
+end
+
 function M_perpt_M_perp_vec_old(dim, size, vec, idx_missing)
     temp = M_perp_beta_old(dim, size, vec, idx_missing);
     temp = M_perp_tz_old(dim, size, temp);
+    return temp
+end
+
+function M_perpt_M_perp_vec_old2(dim, size, vec, idx_missing)
+    temp = M_perp_beta_old2(dim, size, vec, idx_missing);
+    temp = M_perp_tz_old2(dim, size, temp);
     return temp
 end
 

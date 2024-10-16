@@ -13,11 +13,11 @@ include("punching.jl")
 include("Admm_MatrixFree.jl")
 
 include("Admm_alexis.jl")
-version_alexis = true
+version_alexis = false
 graphics = false
 problem_1d = true
-problem_2d = false
-problem_3d = false
+problem_2d = true
+problem_3d = true
 global gpu = false
 global nkrylov_ipm = 0
 
@@ -40,7 +40,9 @@ x = x1.+x2.+x3; #signal
 Random.seed!(1)
 y = x + randn(Nt); #noisy signal
 
-w = round.(fft(x)./sqrt(Nt), digits = 4);#true DFT
+# w = round.(fft(x)./sqrt(Nt), digits = 4);#true DFT
+w = fft(x) ./ sqrt(Nt)
+
 DFTsize = size(x); # problem dim
 DFTdim = length(DFTsize); # problem size
 
@@ -82,12 +84,13 @@ else
     println("The first example requires $t seconds.")
 end
 
-norm(beta_IPOPT .- beta_ADMM)
-
+Δβ = norm(beta_IPOPT - beta_ADMM)
+println("‖β_IPOPT - β_ADMM‖: ", Δβ)
 
 #### comparison with orginal data
 w_est = beta_to_DFT(DFTdim, DFTsize, beta_ADMM)
-norm(w .- w_est)
+Δw = norm(w - w_est)
+println("‖w - w_est‖: ", Δw)
 #############
 
 plot(subgrad_IPOPT, time_IPOPT, seriestype=:scatter, title = "IP: 1d (500) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
@@ -111,7 +114,9 @@ x = (cos.(2*pi*2/Nt*t)+ 2*sin.(2*pi*2/Nt*t))*(cos.(2*pi*3/Ns*s) + 2*sin.(2*pi*3/
 Random.seed!(1)
 y = x + randn(Nt,Ns)#noisy signal
 
-w = round.(fft(x)./sqrt(Nt*Ns), digits = 4);#true DFT
+# w = round.(fft(x)./sqrt(Nt*Ns), digits = 4);#true DFT
+w = fft(x) ./ sqrt(Nt*Ns)
+
 DFTsize = size(x); # problem dim
 DFTdim = length(DFTsize); # problem size
 beta_true = DFT_to_beta(DFTdim, DFTsize, w);
@@ -150,13 +155,16 @@ else
     println("The second example requires $t seconds.")
 end
 
-norm(beta_IPOPT.-beta_ADMM)
+Δβ = norm(beta_IPOPT - beta_ADMM)
+println("‖β_IPOPT - β_ADMM‖: ", Δβ)
 
 #### comparison with orginal data
 w_est = beta_to_DFT(DFTdim, DFTsize, beta_ADMM)
-norm(w.-w_est)
+Δw = norm(w - w_est)
+println("‖w - w_est‖: ", Δw)
 #############
 
+if graphics
 plot(subgrad_IPOPT, time_IPOPT, seriestype=:scatter, title = "IP: 2d (20*24) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
 plot(log.(subgrad_IPOPT), time_IPOPT, seriestype=:scatter, title = "IP: 2d (20*24) time vs log(subgrad)", xlab = "log(subgrad)", ylab = "time", legend = false)
 plot(log.(subgrad_IPOPT), title = "IP: 2d (20*24) log(subgrad)", xlabel = "iter", ylabel = "log(subgrad)", legend = false)
@@ -165,6 +173,7 @@ plot(subgrad_ADMM, time_ADMM, seriestype=:scatter, title = "ADMM: 2d (20*24) tim
 plot(log.(subgrad_ADMM), time_ADMM, seriestype=:scatter, title = "ADMM: 2d (20*24) time vs log(subgrad)", xlab = "log(subgrad)", ylab = "time", legend = false)
 plot(log.(subgrad_ADMM), title = "ADMM: 2d (20*24) log(subgrad)", xlabel = "iter", ylabel = "log(subgrad)", legend = false)
 end
+end
 
 if problem_3d
 ## 3d
@@ -172,9 +181,9 @@ if problem_3d
 # N2 = 8;
 # N3 = 10;
 
-N1 = 100;
-N2 = 100;
-N3 = 100;
+N1 = 10;
+N2 = 10;
+N3 = 10;
 
 idx1 = collect(0:(N1-1));
 idx2 = collect(0:(N2-1));
@@ -183,7 +192,9 @@ x = [(cos(2*pi*1/N1*i)+ 2*sin(2*pi*1/N1*i))*(cos(2*pi*2/N2*j) + 2*sin(2*pi*2/N2*
 Random.seed!(2)
 y = x + rand(N1, N2, N3); # noisy signal
 
-w = round.(fft(x)./sqrt(N1*N2*N3), digits = 4);#true DFT
+# w = round.(fft(x)./sqrt(N1*N2*N3), digits = 4);#true DFT
+w = fft(x) ./ sqrt(N1 * N2 * N3)
+
 DFTsize = size(x); # problem dim
 DFTdim = length(DFTsize); # problem size
 beta_true = DFT_to_beta(DFTdim, DFTsize, w);
@@ -222,12 +233,13 @@ else
     println("The third example requires $t seconds.")
 end
 
-norm(beta_IPOPT.-beta_ADMM)
-
+Δβ = norm(beta_IPOPT - beta_ADMM)
+println("‖β_IPOPT - β_ADMM‖: ", Δβ)
 
 #### comparison with orginal data
 w_est = beta_to_DFT(DFTdim, DFTsize, beta_ADMM)
-norm(w.-w_est)
+Δw = norm(w - w_est)
+println("‖w - w_est‖: ", Δw)
 #############
 
 if graphics
