@@ -31,7 +31,7 @@ end
 
 if problem_1d
 # Nt = 500;
-Nt = 10^5;
+Nt = 5000;
 t = collect(0:(Nt-1));
 x1 = 2*cos.(2*pi*t*6/Nt).+ 3*sin.(2*pi*t*6/Nt);
 x2 = 4*cos.(2*pi*t*10/Nt).+ 5*sin.(2*pi*t*10/Nt);
@@ -46,14 +46,16 @@ w = fft(x) ./ sqrt(Nt)
 DFTsize = size(x); # problem dim
 DFTdim = length(DFTsize); # problem size
 
-missing_prob = 0.15
+missing_prob = 0.0
+# missing_prob = 0.15
 centers = centering(DFTdim, DFTsize, missing_prob)
 radius = 1
 index_missing, z_zero = punching(DFTdim, DFTsize, centers, radius, y)
 
 M_perptz = M_perp_tz_old(DFTdim, DFTsize, z_zero); # M_perptz
 
-lambda = 10;
+lambda = 0.0;
+# lambda = 10;
 
 alpha_LS = 0.1;
 gamma_LS = 0.8;
@@ -77,20 +79,20 @@ paramf = (DFTdim, DFTsize, M_perptz, lambda, index_missing)
 if version_alexis
     beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM_alexis(paramf, rho)
     t = @elapsed cgADMM_alexis(paramf, rho)
-    println("The first example requires $t seconds.")
+    println("1D -- The first example requires $t seconds.")
 else
     beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM(paramf, rho)
     t = @elapsed cgADMM(paramf, rho)
-    println("The first example requires $t seconds.")
+    println("1D -- The first example requires $t seconds.")
 end
 
 Δβ = norm(beta_IPOPT - beta_ADMM)
-println("‖β_IPOPT - β_ADMM‖: ", Δβ)
+println("1D -- ‖β_IPOPT - β_ADMM‖: ", Δβ)
 
 #### comparison with orginal data
 w_est = beta_to_DFT(DFTdim, DFTsize, beta_ADMM)
 Δw = norm(w - w_est)
-println("‖w - w_est‖: ", Δw)
+println("1D -- ‖w - w_est‖: ", Δw)
 #############
 
 plot(subgrad_IPOPT, time_IPOPT, seriestype=:scatter, title = "IP: 1d (500) time vs subgrad", xlab = "subgrad", ylab = "time", legend = false)
@@ -123,7 +125,8 @@ beta_true = DFT_to_beta(DFTdim, DFTsize, w);
 sum(abs.(beta_true))
 
 # randomly generate missing indices
-missing_prob = 0.15
+# missing_prob = 0.15
+missing_prob = 0.0
 centers = centering(DFTdim, DFTsize, missing_prob)
 radius = 1
 
@@ -132,7 +135,8 @@ index_missing_Cartesian, z_zero = punching(DFTdim, DFTsize, centers, radius, y)
 
 # unify parameters for barrier method
 M_perptz = M_perp_tz_old(DFTdim, DFTsize, z_zero);
-lambda = 5
+# lambda = 5
+lambda = 0.0
 
 paramset = paramunified(DFTdim, DFTsize, M_perptz, lambda, index_missing_Cartesian, alpha_LS, gamma_LS, eps_NT, mu_barrier, eps_barrier)
 
@@ -148,20 +152,20 @@ paramf = (DFTdim, DFTsize, M_perptz, lambda, index_missing_Cartesian)
 if version_alexis
     beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM_alexis(paramf, rho)
     t = @elapsed cgADMM_alexis(paramf, rho)
-    println("The second example requires $t seconds.")
+    println("2D -- The second example requires $t seconds.")
 else
     beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM(paramf, rho)
     t = @elapsed cgADMM(paramf, rho)
-    println("The second example requires $t seconds.")
+    println("2D -- The second example requires $t seconds.")
 end
 
 Δβ = norm(beta_IPOPT - beta_ADMM)
-println("‖β_IPOPT - β_ADMM‖: ", Δβ)
+println("2D -- ‖β_IPOPT - β_ADMM‖: ", Δβ)
 
 #### comparison with orginal data
 w_est = beta_to_DFT(DFTdim, DFTsize, beta_ADMM)
 Δw = norm(w - w_est)
-println("‖w - w_est‖: ", Δw)
+println("2D -- ‖w - w_est‖: ", Δw)
 #############
 
 if graphics
@@ -181,9 +185,9 @@ if problem_3d
 # N2 = 8;
 # N3 = 10;
 
-N1 = 10;
-N2 = 10;
-N3 = 10;
+N1 = 4;
+N2 = 4;
+N3 = 4;
 
 idx1 = collect(0:(N1-1));
 idx2 = collect(0:(N2-1));
@@ -202,7 +206,8 @@ sum(abs.(beta_true))
 
 
 # randomly generate missing indices
-missing_prob = 0.15
+# missing_prob = 0.15
+missing_prob = 0.0
 centers = centering(DFTdim, DFTsize, missing_prob)
 radius = 1
 
@@ -210,7 +215,8 @@ index_missing_Cartesian, z_zero = punching(DFTdim, DFTsize, centers, radius, y)
 
 # unify parameters for barrier method
 M_perptz = M_perp_tz_old(DFTdim, DFTsize, z_zero);
-lambda = 5
+# lambda = 5
+lambda = 0.0
 
 paramset = paramunified(DFTdim, DFTsize, M_perptz, lambda, index_missing_Cartesian, alpha_LS, gamma_LS, eps_NT, mu_barrier, eps_barrier)
 
@@ -226,20 +232,20 @@ paramf = (DFTdim, DFTsize, M_perptz, lambda, index_missing_Cartesian)
 if version_alexis
     beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM_alexis(paramf, rho)
     t = @elapsed cgADMM_alexis(paramf, rho)
-    println("The third example requires $t seconds.")
+    println("3D -- The third example requires $t seconds.")
 else
     beta_ADMM, subgrad_ADMM, time_ADMM = cgADMM(paramf, rho)
     t = @elapsed cgADMM(paramf, rho)
-    println("The third example requires $t seconds.")
+    println("3D -- The third example requires $t seconds.")
 end
 
 Δβ = norm(beta_IPOPT - beta_ADMM)
-println("‖β_IPOPT - β_ADMM‖: ", Δβ)
+println("3D -- ‖β_IPOPT - β_ADMM‖: ", Δβ)
 
 #### comparison with orginal data
 w_est = beta_to_DFT(DFTdim, DFTsize, beta_ADMM)
 Δw = norm(w - w_est)
-println("‖w - w_est‖: ", Δw)
+println("3D -- ‖w - w_est‖: ", Δw)
 #############
 
 if graphics
