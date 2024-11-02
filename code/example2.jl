@@ -38,7 +38,8 @@ x2 = 4*cos.(2*pi*t*10/Nt).+ 5*sin.(2*pi*t*10/Nt);
 x3 = 6*cos.(2*pi*t*40/Nt).+ 7*sin.(2*pi*t*40/Nt);
 x = x1.+x2.+x3; #signal
 Random.seed!(1)
-y = x + randn(Nt); #noisy signal
+# y = x + randn(Nt)  # noisy signal
+y = x  # original signal
 
 # w = round.(fft(x)./sqrt(Nt), digits = 4);#true DFT
 w = fft(x) ./ sqrt(Nt)
@@ -114,7 +115,8 @@ t = collect(0:(Nt-1));
 s = collect(0:(Ns-1));
 x = (cos.(2*pi*2/Nt*t)+ 2*sin.(2*pi*2/Nt*t))*(cos.(2*pi*3/Ns*s) + 2*sin.(2*pi*3/Ns*s))';
 Random.seed!(1)
-y = x + randn(Nt,Ns)#noisy signal
+# y = x + randn(Nt,Ns)  # noisy signal
+y = x  # original signal
 
 # w = round.(fft(x)./sqrt(Nt*Ns), digits = 4);#true DFT
 w = fft(x) ./ sqrt(Nt*Ns)
@@ -194,7 +196,8 @@ idx2 = collect(0:(N2-1));
 idx3 = collect(0:(N3-1));
 x = [(cos(2*pi*1/N1*i)+ 2*sin(2*pi*1/N1*i))*(cos(2*pi*2/N2*j) + 2*sin(2*pi*2/N2*j))*(cos(2*pi*3/N3*k) + 2*sin(2*pi*3/N3*k)) for i in idx1, j in idx2, k in idx3];
 Random.seed!(2)
-y = x + rand(N1, N2, N3); # noisy signal
+# y = x + randn(N1, N2, N3)  # noisy signal
+y = x  # original signal
 
 # w = round.(fft(x)./sqrt(N1*N2*N3), digits = 4);#true DFT
 w = fft(x) ./ sqrt(N1 * N2 * N3)
