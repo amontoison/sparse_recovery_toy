@@ -47,8 +47,8 @@ w = fft(x) ./ sqrt(Nt)
 DFTsize = size(x); # problem dim
 DFTdim = length(DFTsize); # problem size
 
-missing_prob = 0.01
 # missing_prob = 0.15
+missing_prob = 0.0
 centers = centering(DFTdim, DFTsize, missing_prob)
 radius = 1
 index_missing, z_zero = punching(DFTdim, DFTsize, centers, radius, y)
@@ -128,7 +128,7 @@ sum(abs.(beta_true))
 
 # randomly generate missing indices
 # missing_prob = 0.15
-missing_prob = 0.01
+missing_prob = 0.15
 centers = centering(DFTdim, DFTsize, missing_prob)
 radius = 1
 
@@ -209,7 +209,7 @@ sum(abs.(beta_true))
 
 # randomly generate missing indices
 # missing_prob = 0.15
-missing_prob = 0.01
+missing_prob = 0.15
 centers = centering(DFTdim, DFTsize, missing_prob)
 radius = 1
 
