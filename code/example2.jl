@@ -207,7 +207,6 @@ DFTdim = length(DFTsize); # problem size
 beta_true = DFT_to_beta(DFTdim, DFTsize, w);
 sum(abs.(beta_true))
 
-
 # randomly generate missing indices
 # missing_prob = 0.15
 missing_prob = 0.0
