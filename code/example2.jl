@@ -54,7 +54,7 @@ index_missing, z_zero = punching(DFTdim, DFTsize, centers, radius, y)
 
 M_perptz = M_perp_tz_old(DFTdim, DFTsize, z_zero); # M_perptz
 
-lambda = 0.0;
+lambda = 1e-8;
 # lambda = 10;
 
 alpha_LS = 0.1;
@@ -136,7 +136,7 @@ index_missing_Cartesian, z_zero = punching(DFTdim, DFTsize, centers, radius, y)
 # unify parameters for barrier method
 M_perptz = M_perp_tz_old(DFTdim, DFTsize, z_zero);
 # lambda = 5
-lambda = 0.0
+lambda = 1e-8
 
 paramset = paramunified(DFTdim, DFTsize, M_perptz, lambda, index_missing_Cartesian, alpha_LS, gamma_LS, eps_NT, mu_barrier, eps_barrier)
 
@@ -216,7 +216,7 @@ index_missing_Cartesian, z_zero = punching(DFTdim, DFTsize, centers, radius, y)
 # unify parameters for barrier method
 M_perptz = M_perp_tz_old(DFTdim, DFTsize, z_zero);
 # lambda = 5
-lambda = 0.0
+lambda = 1e-8
 
 paramset = paramunified(DFTdim, DFTsize, M_perptz, lambda, index_missing_Cartesian, alpha_LS, gamma_LS, eps_NT, mu_barrier, eps_barrier)
 
