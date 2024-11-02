@@ -30,8 +30,8 @@ function paramunified(DFTdim, DFTsize, M_perptz, lambda, index_missing, alpha_LS
 end
 
 if problem_1d
-# Nt = 500;
-Nt = 5000;
+Nt = 500;
+# Nt = 5000;
 t = collect(0:(Nt-1));
 x1 = 2*cos.(2*pi*t*6/Nt).+ 3*sin.(2*pi*t*6/Nt);
 x2 = 4*cos.(2*pi*t*10/Nt).+ 5*sin.(2*pi*t*10/Nt);
